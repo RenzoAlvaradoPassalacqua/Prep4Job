@@ -1,0 +1,36 @@
+included:
+  - Prep4Job
+
+excluded:
+  - Prep4JobTests
+  - Prep4JobUITests
+  - DerivedData
+  - .build
+
+disabled_rules:
+  - trailing_whitespace
+
+opt_in_rules:
+  - empty_count
+  - empty_string
+  - force_unwrapping
+  - modifier_order
+  - redundant_nil_coalescing
+  - vertical_whitespace
+
+line_length:
+  warning: 120
+  error: 160
+
+file_length:
+  warning: 500
+  error: 700
+
+type_body_length:
+  warning: 300
+  error: 450
+
+identifier_name:
+  min_length:
+    warning: 2
+    error: 1

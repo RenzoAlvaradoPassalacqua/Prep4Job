@@ -1,0 +1,5 @@
+--swift-version 5
+--maxwidth 120
+--wraparguments before-first
+--wrapcollections before-first
+--trailingcommas never
