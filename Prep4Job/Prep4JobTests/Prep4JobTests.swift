@@ -193,6 +193,68 @@ struct Prep4JobTests {
     }
 
     @Test
+    func supabaseSessionResponseDecodesTopLevelAccessToken() throws {
+        let data = Data("""
+        {
+          "access_token": "top-level-token",
+          "user": {
+            "id": "00000000-0000-0000-0000-000000000001",
+            "email": "renzo@example.com",
+            "created_at": "2026-09-11T12:00:00Z",
+            "user_metadata": { "display_name": "Renzo" }
+          }
+        }
+        """.utf8)
+
+        let payload = try JSONDecoder().decode(SupabaseSessionResponse.self, from: data)
+
+        #expect(payload.accessToken == "top-level-token")
+        #expect(payload.user?.account?.displayName == "Renzo")
+    }
+
+    @Test
+    func supabaseSessionResponseDecodesNestedSessionAccessToken() throws {
+        let data = Data("""
+        {
+          "session": {
+            "access_token": "nested-token",
+            "user": {
+              "id": "00000000-0000-0000-0000-000000000002",
+              "email": "renzo@example.com",
+              "created_at": "2026-09-11T12:00:00Z",
+              "user_metadata": { "display_name": "Renzo" }
+            }
+          }
+        }
+        """.utf8)
+
+        let payload = try JSONDecoder().decode(SupabaseSessionResponse.self, from: data)
+
+        #expect(payload.accessToken == "nested-token")
+        #expect(payload.user?.account?.email == "renzo@example.com")
+    }
+
+    @Test
+    func supabaseSignUpConfirmationResponseHasNoAccessToken() throws {
+        let data = Data("""
+        {
+          "user": {
+            "id": "00000000-0000-0000-0000-000000000003",
+            "email": "renzo@example.com",
+            "created_at": "2026-09-11T12:00:00Z",
+            "user_metadata": { "display_name": "Renzo" }
+          },
+          "session": null
+        }
+        """.utf8)
+
+        let payload = try JSONDecoder().decode(SupabaseSessionResponse.self, from: data)
+
+        #expect(payload.accessToken == nil)
+        #expect(payload.user?.account?.email == "renzo@example.com")
+    }
+
+    @Test
     func demoSubscriptionActivatesPremium() async throws {
         let service = DemoSubscriptionService()
         let products = try await service.products()

@@ -1,6 +1,7 @@
 import Foundation
 
 actor LocalAuthService: AuthService {
+    func accessToken() async -> String? { nil }
     private let fileURL: URL
 
     init(fileURL: URL? = nil) {
@@ -13,9 +14,8 @@ actor LocalAuthService: AuthService {
     }
 
     func signIn(email: String, password: String) async throws -> UserAccount {
-        guard isValid(email: email, password: password) else {
-            throw AuthError.invalidCredentials
-        }
+        guard let email = AuthInputValidator.email(email) else { throw AuthError.invalidEmail }
+        guard AuthInputValidator.password(password) != nil else { throw AuthError.invalidPassword }
         guard let account = await restoreSession(), account.email.caseInsensitiveCompare(email) == .orderedSame else {
             throw AuthError.invalidCredentials
         }
@@ -23,9 +23,8 @@ actor LocalAuthService: AuthService {
     }
 
     func signUp(email: String, password: String, displayName: String) async throws -> UserAccount {
-        guard isValid(email: email, password: password) else {
-            throw AuthError.invalidCredentials
-        }
+        guard let email = AuthInputValidator.email(email) else { throw AuthError.invalidEmail }
+        guard AuthInputValidator.password(password) != nil else { throw AuthError.invalidPassword }
         if await restoreSession() != nil {
             throw AuthError.accountAlreadyExists
         }
@@ -54,10 +53,6 @@ actor LocalAuthService: AuthService {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         let data = try JSONEncoder().encode(account)
         try data.write(to: fileURL, options: .atomic)
-    }
-
-    private func isValid(email: String, password: String) -> Bool {
-        email.contains("@") && email.contains(".") && password.count >= 6
     }
 
     private static func defaultFileURL() -> URL {

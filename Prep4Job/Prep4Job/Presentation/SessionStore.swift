@@ -20,6 +20,7 @@ final class SessionStore: ObservableObject {
     func restore() async {
         state = .loading
         let account = await service.restoreSession()
+        await AuthSessionCoordinator.shared.setToken(await service.accessToken())
         state = account.map(AuthState.signedIn) ?? .signedOut
     }
 
@@ -37,6 +38,7 @@ final class SessionStore: ObservableObject {
 
     func signOut() async {
         await service.signOut()
+        await AuthSessionCoordinator.shared.setToken(nil)
         state = .signedOut
     }
 

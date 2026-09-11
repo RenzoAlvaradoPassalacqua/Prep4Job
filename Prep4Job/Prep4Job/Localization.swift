@@ -220,7 +220,15 @@ nonisolated enum L10n {
         )
         static let invalidCredentials = String(
             localized: "account.invalidCredentials",
-            defaultValue: "Usa un correo válido y una contraseña de al menos 6 caracteres."
+            defaultValue: "El correo o la contraseña no coinciden. Si aún no tienes cuenta, regístrate primero."
+        )
+        static let invalidEmail = String(
+            localized: "account.invalidEmail",
+            defaultValue: "Escribe un correo válido, por ejemplo: nombre@dominio.com."
+        )
+        static let invalidPassword = String(
+            localized: "account.invalidPassword",
+            defaultValue: "La contraseña debe tener al menos 6 caracteres."
         )
         static let accountAlreadyExists = String(
             localized: "account.accountAlreadyExists",
@@ -233,6 +241,10 @@ nonisolated enum L10n {
         static let backendNotConfigured = String(
             localized: "account.backendNotConfigured",
             defaultValue: "El backend todavía no está configurado."
+        )
+        static let emailConfirmationRequired = String(
+            localized: "account.emailConfirmationRequired",
+            defaultValue: "Revisa tu correo para confirmar la cuenta. Luego inicia sesión."
         )
         static let invalidResponse = String(
             localized: "account.invalidResponse",
