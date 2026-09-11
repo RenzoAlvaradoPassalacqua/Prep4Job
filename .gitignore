@@ -1,0 +1,19 @@
+# Dependencies and local tooling
+node_modules/
+package.json
+package-lock.json
+
+# Generated media and reports
+*.pdf
+*.mp4
+
+# macOS and Xcode user state
+.DS_Store
+**/xcuserdata/
+*.xcuserstate
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+supabase/.env.local
