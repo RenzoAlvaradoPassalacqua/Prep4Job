@@ -68,9 +68,19 @@ private struct RemoteQuestion: Decodable {
     let question: String
     let answer: String
     let concepts: [String]
+    let purpose: String
+    let tip: String
 
     var model: InterviewQuestion {
-        InterviewQuestion(id: id, title: question, category: category, purpose: category, tip: "", answer: answer, concepts: concepts)
+        InterviewQuestion(
+            id: id,
+            title: question,
+            category: category,
+            purpose: purpose,
+            tip: tip,
+            answer: answer,
+            concepts: concepts
+        )
     }
 }
 
