@@ -92,6 +92,7 @@ nonisolated enum L10n {
             defaultValue: "Escribe una experiencia real. La app te ayudará a organizarla sin inventar información."
         )
         static let saveAnswer = String(localized: "dailyQuestion.saveAnswer", defaultValue: "Guardar respuesta")
+        static let nextQuestion = String(localized: "dailyQuestion.nextQuestion", defaultValue: "Siguiente pregunta")
         static let myAnswer = String(localized: "dailyQuestion.myAnswer", defaultValue: "Mi respuesta")
         static let emptyTitle = String(localized: "dailyQuestion.emptyTitle", defaultValue: "Pregunta no disponible")
         static let emptyMessage = String(

@@ -151,6 +151,17 @@ struct AnswerCard: View {
                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 }
             }
+            Button {
+                viewModel.nextQuestion()
+            } label: {
+                Label(L10n.DailyQuestion.nextQuestion, systemImage: "arrow.right")
+                    .font(.subheadline.weight(.semibold))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 13)
+                    .foregroundStyle(Prep4JobTheme.indigo)
+                    .overlay(RoundedRectangle(cornerRadius: 13).stroke(Prep4JobTheme.indigo, lineWidth: 1.2))
+            }
+            .buttonStyle(.plain)
             NavigationLink {
                 AnswerEditorView(viewModel: viewModel)
             } label: {
