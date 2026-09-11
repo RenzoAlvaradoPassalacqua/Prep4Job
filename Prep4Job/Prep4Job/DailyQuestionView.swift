@@ -135,6 +135,22 @@ struct AnswerCard: View {
                         .clipShape(Capsule())
                 }
             }
+            Text(L10n.DailyQuestion.rateAnswer)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Prep4JobTheme.ink)
+            HStack(spacing: 8) {
+                ForEach(ReviewRating.allCases) { rating in
+                    Button(rating.title) {
+                        viewModel.rateCurrentQuestion(rating)
+                    }
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Prep4JobTheme.indigo)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 9)
+                    .background(Prep4JobTheme.indigo.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                }
+            }
             NavigationLink {
                 AnswerEditorView(viewModel: viewModel)
             } label: {
@@ -147,6 +163,17 @@ struct AnswerCard: View {
         .padding(18)
         .background(Color.green.opacity(0.08))
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+    }
+}
+
+private extension ReviewRating {
+    var title: String {
+        switch self {
+        case .again: L10n.DailyQuestion.ratingAgain
+        case .hard: L10n.DailyQuestion.ratingHard
+        case .good: L10n.DailyQuestion.ratingGood
+        case .easy: L10n.DailyQuestion.ratingEasy
+        }
     }
 }
 

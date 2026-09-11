@@ -31,6 +31,14 @@ nonisolated enum L10n {
             localized: "error.aiAnswerUnavailable",
             defaultValue: "La IA no pudo generar una respuesta en este momento."
         )
+        static let notificationsDenied = String(
+            localized: "error.notificationsDenied",
+            defaultValue: "Activa las notificaciones en Ajustes para recibir recordatorios."
+        )
+        static let notificationsUnavailable = String(
+            localized: "error.notificationsUnavailable",
+            defaultValue: "No se pudo programar el recordatorio. Inténtalo de nuevo."
+        )
     }
 
     nonisolated enum Tabs {
@@ -102,6 +110,14 @@ nonisolated enum L10n {
             localized: "dailyQuestion.cancelGeneration",
             defaultValue: "Cancelar"
         )
+        static let rateAnswer = String(
+            localized: "dailyQuestion.rateAnswer",
+            defaultValue: "¿Qué tan fácil fue recordarla?"
+        )
+        static let ratingAgain = String(localized: "dailyQuestion.ratingAgain", defaultValue: "Otra vez")
+        static let ratingHard = String(localized: "dailyQuestion.ratingHard", defaultValue: "Difícil")
+        static let ratingGood = String(localized: "dailyQuestion.ratingGood", defaultValue: "Bien")
+        static let ratingEasy = String(localized: "dailyQuestion.ratingEasy", defaultValue: "Fácil")
     }
 
     nonisolated enum Learn {
@@ -134,7 +150,10 @@ nonisolated enum L10n {
         static let concepts = String(localized: "progress.concepts", defaultValue: "conceptos")
         static let answers = String(localized: "progress.answers", defaultValue: "respuestas")
         static let streakDays = String(localized: "progress.streakDays", defaultValue: "días de racha")
-        static let reviewToday = String(localized: "progress.reviewToday", defaultValue: "Repasar hoy · 4 temas")
+        static func reviewToday(count _: Int) -> String {
+            String(localized: "progress.reviewToday", defaultValue: "Repasar hoy · (count) temas")
+        }
+
         static let reviewDescription = String(
             localized: "progress.reviewDescription",
             defaultValue: "Refuerza tus puntos más importantes y sigue avanzando."
@@ -142,6 +161,37 @@ nonisolated enum L10n {
         static let motivation = String(
             localized: "progress.motivation",
             defaultValue: "Disciplina hoy, entrevista soñada mañana."
+        )
+        static let remindersTitle = String(
+            localized: "progress.remindersTitle",
+            defaultValue: "Recordatorio diario"
+        )
+        static let remindersEnabled = String(
+            localized: "progress.remindersEnabled",
+            defaultValue: "Te avisaremos cada día a las 19:00."
+        )
+        static let remindersDisabled = String(
+            localized: "progress.remindersDisabled",
+            defaultValue: "Recibe un aviso para mantener tu ritmo de estudio."
+        )
+        static let enableReminder = String(
+            localized: "progress.enableReminder",
+            defaultValue: "Activar recordatorio"
+        )
+        static let disableReminder = String(
+            localized: "progress.disableReminder",
+            defaultValue: "Desactivar recordatorio"
+        )
+        static func reviewProgress(reviewed _: Int, total _: Int) -> String {
+            String(localized: "progress.reviewProgress", defaultValue: "(reviewed) de (total) temas repasados")
+        }
+    }
+
+    nonisolated enum Notifications {
+        static let title = String(localized: "notifications.title", defaultValue: "Prep4Job")
+        static let body = String(
+            localized: "notifications.body",
+            defaultValue: "Tu sesión de hoy te acerca a tu próxima oportunidad."
         )
     }
 

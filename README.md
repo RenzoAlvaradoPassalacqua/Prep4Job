@@ -51,3 +51,27 @@ Validaciones realizadas:
 	•	La app se instaló y ejecutó correctamente en el simulador.
 La siguiente etapa sería el paso 3: integrar el servicio de IA mediante un protocolo como AIAnswerService, manejar estados loading/success/error, cancelación de tareas y posteriormente persistencia local.
 
+
+Paso 4 completado.
+Implementado:
+- Repetición espaciada basada en SM-2 con niveles: Otra vez, Difícil, Bien y Fácil.
+- Próxima fecha de revisión calculada automáticamente.
+- Persistencia de intervalos, repeticiones, factor de facilidad y fechas.
+- Seguimiento de actividad diaria, racha y temas repasados.
+- Progreso dinámico en Home y Dashboard.
+- Recordatorios diarios mediante UNUserNotificationCenter, programados inicialmente a las 19:00.
+- Compatibilidad con snapshots antiguos sin perder datos.
+- Tests de algoritmo, progreso, migración y notificaciones.
+Archivos principales:
+- [SpacedRepetition.swift]
+- [StudyProgress.swift]
+- [StudyReminderScheduler.swift]
+- [PrepStore.swift]
+- [ProgressDashboardView.swift]
+- [Prep4JobTests.swift]
+Validación:
+- 11 tests aprobados.
+- Compilación con concurrencia estricta correcta.
+- SwiftLint: 0 violaciones.
+- SwiftFormat ejecutado.
+- App instalada y ejecutada en el simulador.

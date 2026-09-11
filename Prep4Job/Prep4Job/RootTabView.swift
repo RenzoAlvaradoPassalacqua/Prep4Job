@@ -51,7 +51,7 @@ struct HomeView: View {
                                     .foregroundStyle(.secondary)
                             }
                             HStack(spacing: 22) {
-                                ProgressRing(value: 0.72).frame(width: 108, height: 108)
+                                ProgressRing(value: viewModel.completion).frame(width: 108, height: 108)
                                 VStack(alignment: .leading, spacing: 11) {
                                     ChecklistRow(done: true, text: L10n.Home.twoConcepts)
                                     ChecklistRow(done: true, text: L10n.Home.oneQuestion)

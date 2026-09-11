@@ -2,7 +2,6 @@ import SwiftUI
 
 struct ProgressDashboardView: View {
     @StateObject private var viewModel: ProgressViewModel
-    private let values = [0.42, 0.66, 0.42, 0.55, 0.76, 1.0, 0.60]
     private let days = L10n.Progress.days
 
     init(store: PrepStore) {
@@ -17,13 +16,13 @@ struct ProgressDashboardView: View {
                     Text(L10n.Progress.subtitle).font(.subheadline).foregroundStyle(.secondary)
                     Card {
                         HStack(alignment: .bottom, spacing: 11) {
-                            ForEach(Array(values.enumerated()), id: \.offset) { index, value in
+                            ForEach(Array(viewModel.weeklyActivityValues.enumerated()), id: \.offset) { index, value in
                                 VStack(spacing: 7) {
                                     Capsule()
-                                        .fill(index == 5 ? Prep4JobTheme.indigo : Prep4JobTheme.indigo.opacity(0.25))
+                                        .fill(index == 6 ? Prep4JobTheme.indigo : Prep4JobTheme.indigo.opacity(0.25))
                                         .frame(
                                             width: 22,
-                                            height: CGFloat(100 * value)
+                                            height: CGFloat(max(10, 100 * value))
                                         )
                                     Text(days[index]).font(.caption2).foregroundStyle(.secondary)
                                 }
@@ -56,12 +55,47 @@ struct ProgressDashboardView: View {
                         HStack(spacing: 12) {
                             Image(systemName: "target").font(.title2).foregroundStyle(Prep4JobTheme.indigo)
                             VStack(alignment: .leading, spacing: 3) {
-                                Text(L10n.Progress.reviewToday).font(.headline.weight(.bold))
+                                Text(L10n.Progress.reviewToday(count: viewModel.dueReviewCount))
+                                    .font(.headline.weight(.bold))
                                     .foregroundStyle(Prep4JobTheme.ink)
                                 Text(L10n.Progress.reviewDescription).font(.caption).foregroundStyle(.secondary)
+                                Text(L10n.Progress.reviewProgress(
+                                    reviewed: viewModel.reviewedItemCount,
+                                    total: viewModel.totalReviewItemCount
+                                ))
+                                .font(.caption2.weight(.semibold))
+                                .foregroundStyle(Prep4JobTheme.indigo)
                             }
                             Spacer()
                             Image(systemName: "chevron.right").foregroundStyle(.secondary)
+                        }
+                    }
+                    Card {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Label(L10n.Progress.remindersTitle, systemImage: "bell.badge.fill")
+                                .font(.headline.weight(.bold))
+                                .foregroundStyle(Prep4JobTheme.ink)
+                            Text(
+                                viewModel.reminderEnabled
+                                    ? L10n.Progress.remindersEnabled
+                                    : L10n.Progress.remindersDisabled
+                            )
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            Button(
+                                viewModel.reminderEnabled
+                                    ? L10n.Progress.disableReminder
+                                    : L10n.Progress.enableReminder
+                            ) {
+                                viewModel.toggleReminder()
+                            }
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Prep4JobTheme.indigo)
+                            if let reminderError = viewModel.reminderError {
+                                Text(reminderError)
+                                    .font(.caption)
+                                    .foregroundStyle(.red)
+                            }
                         }
                     }
                     Card {

@@ -88,6 +88,10 @@ final class DailyQuestionViewModel: StoreViewModel {
         answerState = .loaded(AIAnswer(text: answer, concepts: question?.concepts ?? []))
     }
 
+    func rateCurrentQuestion(_ rating: ReviewRating) {
+        store.reviewCurrentQuestion(with: rating)
+    }
+
     func cancelGeneration() {
         generationTask?.cancel()
         generationTask = nil
@@ -146,5 +150,42 @@ final class ProgressViewModel: StoreViewModel {
 
     var completion: Double {
         store.completion
+    }
+
+    var dueReviewCount: Int {
+        store.dueReviewCount
+    }
+
+    var reviewedItemCount: Int {
+        store.completedReviewCount
+    }
+
+    var totalReviewItemCount: Int {
+        store.reviewSchedules.count
+    }
+
+    var reminderEnabled: Bool {
+        store.reminderSettings.isEnabled
+    }
+
+    var reminderError: String? {
+        store.reminderError
+    }
+
+    var weeklyActivityValues: [Double] {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        return (0 ..< 7).map { offset in
+            guard let date = calendar.date(byAdding: .day, value: offset - 6, to: today) else { return 0 }
+            let activity = store.dailyActivity.first {
+                calendar.isDate($0.date, inSameDayAs: date)
+            }
+            return min(Double(activity?.totalReviews ?? 0) / 4.0, 1.0)
+        }
+    }
+
+    func toggleReminder() {
+        let shouldEnable = !store.reminderSettings.isEnabled
+        Task { await store.setReminderEnabled(shouldEnable) }
     }
 }
