@@ -45,11 +45,11 @@ final class PrepStore: ObservableObject {
     private var hasLoaded = false
 
     init(
-        repository: any PrepContentRepository = DemoContentRepository(),
+        repository: (any PrepContentRepository)? = nil,
         persistence: (any ProgressPersistence)? = nil,
         reminderScheduler: (any StudyReminderScheduling)? = nil
     ) {
-        loadPreparationContent = LoadPreparationContentUseCase(repository: repository)
+        loadPreparationContent = LoadPreparationContentUseCase(repository: repository ?? ContentRepositoryFactory.makeDefault())
         self.persistence = persistence ?? ProgressPersistenceFactory.makeDefault()
         self.reminderScheduler = reminderScheduler ?? LocalNotificationScheduler()
         questions = DemoContent.questions

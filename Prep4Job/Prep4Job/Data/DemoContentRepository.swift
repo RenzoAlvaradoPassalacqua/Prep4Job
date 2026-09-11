@@ -17,6 +17,79 @@ struct DemoContentRepository: PrepContentRepository {
     }
 }
 
+/// Remote content source. Falls back to the demo repository when configuration is absent.
+struct SupabaseContentRepository: PrepContentRepository {
+    private let baseURL: URL
+    private let publishableKey: String
+    private let session: URLSession
+
+    init?(session: URLSession = .shared) {
+        let environment = ProcessInfo.processInfo.environment
+        guard
+            let urlString = (Bundle.main.object(forInfoDictionaryKey: "SUPABASE_URL") as? String)
+                ?? environment["SUPABASE_URL"],
+            let url = URL(string: urlString),
+            let key = (Bundle.main.object(forInfoDictionaryKey: "SUPABASE_PUBLISHABLE_KEY") as? String)
+                ?? environment["SUPABASE_PUBLISHABLE_KEY"],
+            !key.isEmpty
+        else { return nil }
+        baseURL = url
+        publishableKey = key
+        self.session = session
+    }
+
+    func fetchQuestions() async throws -> [InterviewQuestion] {
+        let rows: [RemoteQuestion] = try await fetch(path: "interview_questions?select=*")
+        return rows.map { $0.model }
+    }
+
+    func fetchConcepts() async throws -> [LearningConcept] {
+        let rows: [RemoteConcept] = try await fetch(path: "learning_concepts?select=*")
+        return rows.map { $0.model }
+    }
+
+    private func fetch<T: Decodable>(path: String) async throws -> T {
+        let requestURL = baseURL.appendingPathComponent("rest/v1/\(path)")
+        var request = URLRequest(url: requestURL)
+        request.setValue(publishableKey, forHTTPHeaderField: "apikey")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        let (data, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse, (200..<300).contains(httpResponse.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+        return try JSONDecoder().decode(T.self, from: data)
+    }
+}
+
+private struct RemoteQuestion: Decodable {
+    let id: UUID
+    let category: String
+    let question: String
+    let answer: String
+    let concepts: [String]
+
+    var model: InterviewQuestion {
+        InterviewQuestion(id: id, title: question, category: category, purpose: category, tip: "", answer: answer, concepts: concepts)
+    }
+}
+
+private struct RemoteConcept: Decodable {
+    let id: UUID
+    let title: String
+    let summary: String
+    let detail: String
+
+    var model: LearningConcept {
+        LearningConcept(id: id, title: title, subtitle: summary, explanation: detail, steps: [], color: .indigo)
+    }
+}
+
+enum ContentRepositoryFactory {
+    static func makeDefault() -> any PrepContentRepository {
+        SupabaseContentRepository() ?? DemoContentRepository()
+    }
+}
+
 enum DemoContent {
     static let questions: [InterviewQuestion] = [
         InterviewQuestion(
