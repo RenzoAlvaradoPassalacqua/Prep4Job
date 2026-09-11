@@ -48,7 +48,9 @@ struct SupabaseContentRepository: PrepContentRepository {
     }
 
     private func fetch<T: Decodable>(path: String) async throws -> T {
-        let requestURL = baseURL.appendingPathComponent("rest/v1/\(path)")
+        guard let requestURL = URL(string: "\(baseURL.absoluteString)/rest/v1/\(path)") else {
+            throw URLError(.badURL)
+        }
         var request = URLRequest(url: requestURL)
         request.setValue(publishableKey, forHTTPHeaderField: "apikey")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
