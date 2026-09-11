@@ -220,7 +220,7 @@ private struct AnswerTextView: UIViewRepresentable {
         return textView
     }
 
-    func updateUIView(_ uiView: UITextView, context: Context) {
+    func updateUIView(_ uiView: UITextView, context _: Context) {
         if uiView.text != text {
             uiView.text = text
         }

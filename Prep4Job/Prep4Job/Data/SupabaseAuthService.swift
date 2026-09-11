@@ -176,13 +176,18 @@ nonisolated struct SupabaseUser: Decodable, Sendable {
 
 enum AuthServiceFactory {
     static func makeDefault() -> any AuthService {
-        guard let urlString = Bundle.main.object(forInfoDictionaryKey: "SUPABASE_URL") as? String,
+        let environment = ProcessInfo.processInfo.environment
+        let urlString = (Bundle.main.object(forInfoDictionaryKey: "SUPABASE_URL") as? String)
+            ?? environment["SUPABASE_URL"]
+        let publishableKey = (Bundle.main.object(forInfoDictionaryKey: "SUPABASE_PUBLISHABLE_KEY") as? String)
+            ?? environment["SUPABASE_PUBLISHABLE_KEY"]
+        guard let urlString,
               let url = URL(string: urlString),
-              let key = Bundle.main.object(forInfoDictionaryKey: "SUPABASE_PUBLISHABLE_KEY") as? String,
-              !key.isEmpty
+              let publishableKey,
+              !publishableKey.isEmpty
         else {
             return LocalAuthService()
         }
-        return SupabaseAuthService(configuration: SupabaseConfiguration(url: url, publishableKey: key))
+        return SupabaseAuthService(configuration: SupabaseConfiguration(url: url, publishableKey: publishableKey))
     }
 }
