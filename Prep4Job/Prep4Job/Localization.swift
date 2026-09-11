@@ -195,6 +195,110 @@ nonisolated enum L10n {
         )
     }
 
+    nonisolated enum Account {
+        static let title = String(localized: "account.title", defaultValue: "Mi cuenta")
+        static let createTitle = String(localized: "account.createTitle", defaultValue: "Crea tu cuenta")
+        static let signInTitle = String(localized: "account.signInTitle", defaultValue: "Inicia sesión")
+        static let email = String(localized: "account.email", defaultValue: "Correo electrónico")
+        static let password = String(localized: "account.password", defaultValue: "Contraseña")
+        static let displayName = String(localized: "account.displayName", defaultValue: "Nombre")
+        static let signIn = String(localized: "account.signIn", defaultValue: "Iniciar sesión")
+        static let signUp = String(localized: "account.signUp", defaultValue: "Crear cuenta")
+        static let switchToSignUp = String(
+            localized: "account.switchToSignUp",
+            defaultValue: "¿Primera vez? Crea una cuenta"
+        )
+        static let switchToSignIn = String(
+            localized: "account.switchToSignIn",
+            defaultValue: "Ya tengo una cuenta"
+        )
+        static let signOut = String(localized: "account.signOut", defaultValue: "Cerrar sesión")
+        static let developmentMode = String(
+            localized: "account.developmentMode",
+            defaultValue: "Modo local de desarrollo"
+        )
+        static let invalidCredentials = String(
+            localized: "account.invalidCredentials",
+            defaultValue: "Usa un correo válido y una contraseña de al menos 6 caracteres."
+        )
+        static let accountAlreadyExists = String(
+            localized: "account.accountAlreadyExists",
+            defaultValue: "Ya existe una cuenta local en este dispositivo."
+        )
+        static let networkUnavailable = String(
+            localized: "account.networkUnavailable",
+            defaultValue: "No se pudo conectar con el backend."
+        )
+        static let backendNotConfigured = String(
+            localized: "account.backendNotConfigured",
+            defaultValue: "El backend todavía no está configurado."
+        )
+        static let invalidResponse = String(
+            localized: "account.invalidResponse",
+            defaultValue: "El backend devolvió una respuesta no válida."
+        )
+        static let legal = String(localized: "account.legal", defaultValue: "Privacidad y cuenta")
+        static let deleteAccount = String(localized: "account.deleteAccount", defaultValue: "Eliminar cuenta")
+        static let deleteAccountMessage = String(
+            localized: "account.deleteAccountMessage",
+            defaultValue: "Esta acción elimina tu cuenta y tus datos asociados. No se puede deshacer."
+        )
+        static let confirmDelete = String(localized: "account.confirmDelete", defaultValue: "Eliminar definitivamente")
+        static let cancel = String(localized: "account.cancel", defaultValue: "Cancelar")
+        static let terms = String(localized: "account.terms", defaultValue: "Términos de uso")
+        static let privacy = String(localized: "account.privacy", defaultValue: "Política de privacidad")
+        static let legalBody = String(
+            localized: "account.legalBody",
+            // swiftlint:disable:next line_length
+            defaultValue: "Prep4Job procesa tu cuenta, progreso de estudio y solicitudes de IA para ofrecer la experiencia de preparación. Puedes solicitar la eliminación de tu cuenta en cualquier momento."
+        )
+        static let termsBody = String(
+            localized: "account.termsBody",
+            // swiftlint:disable:next line_length
+            defaultValue: "Usa Prep4Job de forma responsable. El contenido generado por IA es educativo y debe revisarse antes de usarlo en una entrevista."
+        )
+    }
+
+    nonisolated enum Subscription {
+        static let title = String(localized: "subscription.title", defaultValue: "Prep4Job Premium")
+        static let subtitle = String(
+            localized: "subscription.subtitle",
+            defaultValue: "Aprende con más profundidad y mantén tu progreso sincronizado."
+        )
+        static let premiumActive = String(
+            localized: "subscription.premiumActive",
+            defaultValue: "Premium activo"
+        )
+        static let freePlan = String(localized: "subscription.freePlan", defaultValue: "Plan gratuito")
+        static let monthly = String(localized: "subscription.monthly", defaultValue: "Premium mensual")
+        static let yearly = String(localized: "subscription.yearly", defaultValue: "Premium anual")
+        static let monthlyPeriod = String(localized: "subscription.monthlyPeriod", defaultValue: "por mes")
+        static let yearlyPeriod = String(localized: "subscription.yearlyPeriod", defaultValue: "por año")
+        static let dailyPeriod = String(localized: "subscription.dailyPeriod", defaultValue: "diario")
+        static let weeklyPeriod = String(localized: "subscription.weeklyPeriod", defaultValue: "semanal")
+        static let restore = String(localized: "subscription.restore", defaultValue: "Restaurar compras")
+        static let productNotFound = String(
+            localized: "subscription.productNotFound",
+            defaultValue: "Producto Premium no disponible."
+        )
+        static let purchasePending = String(
+            localized: "subscription.purchasePending",
+            defaultValue: "La compra está pendiente de aprobación."
+        )
+        static let purchaseCancelled = String(
+            localized: "subscription.purchaseCancelled",
+            defaultValue: "La compra fue cancelada."
+        )
+        static let unverifiedTransaction = String(
+            localized: "subscription.unverifiedTransaction",
+            defaultValue: "No se pudo verificar la transacción."
+        )
+        static let storeUnavailable = String(
+            localized: "subscription.storeUnavailable",
+            defaultValue: "La tienda no está disponible en este momento."
+        )
+    }
+
     nonisolated enum Concepts {
         static let star = String(localized: "concept.star.title", defaultValue: "Método STAR")
         static let starSubtitle = String(

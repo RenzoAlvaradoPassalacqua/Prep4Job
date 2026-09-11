@@ -169,6 +169,39 @@ struct Prep4JobTests {
         #expect(snapshot.reviewSchedules.isEmpty)
         #expect(snapshot.reminderSettings == ReminderSettings())
     }
+
+    @Test
+    func localAuthCreatesRestoresAndSignsOut() async throws {
+        let fileURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("prep4job-account-(UUID().uuidString).json")
+        let service = LocalAuthService(fileURL: fileURL)
+
+        let account = try await service.signUp(
+            email: "renzo@example.com",
+            password: "123456",
+            displayName: "Renzo"
+        )
+        let restored = await service.restoreSession()
+        let signedIn = try await service.signIn(email: account.email, password: "123456")
+
+        #expect(restored == account)
+        #expect(signedIn == account)
+
+        await service.signOut()
+        #expect(await service.restoreSession() == nil)
+        try? FileManager.default.removeItem(at: fileURL)
+    }
+
+    @Test
+    func demoSubscriptionActivatesPremium() async throws {
+        let service = DemoSubscriptionService()
+        let products = try await service.products()
+        let entitlement = try await service.purchase(productID: products[0].id)
+
+        #expect(products.count == 2)
+        #expect(entitlement.isActive)
+        #expect((await service.currentEntitlement()).isActive)
+    }
 }
 
 private struct EmptyContentRepository: PrepContentRepository {

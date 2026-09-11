@@ -185,8 +185,8 @@ struct AnswerEditorView: View {
         VStack(alignment: .leading, spacing: 16) {
             Text(L10n.DailyQuestion.editorHint)
                 .font(.subheadline).foregroundStyle(.secondary)
-            TextEditor(text: viewModel.savedAnswerBinding)
-                .scrollContentBackground(.hidden)
+            AnswerTextView(text: viewModel.savedAnswerBinding)
+                .frame(minHeight: 220)
                 .padding(12)
                 .background(Color.white)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
@@ -201,5 +201,44 @@ struct AnswerEditorView: View {
         .background(Prep4JobTheme.canvas)
         .navigationTitle(L10n.DailyQuestion.myAnswer)
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+private struct AnswerTextView: UIViewRepresentable {
+    @Binding var text: String
+
+    func makeUIView(context: Context) -> UITextView {
+        let textView = UITextView()
+        textView.delegate = context.coordinator
+        textView.backgroundColor = .clear
+        textView.font = .preferredFont(forTextStyle: .body)
+        textView.adjustsFontForContentSizeCategory = true
+        textView.textContainerInset = .zero
+        textView.textContainer.lineFragmentPadding = 0
+        textView.inputAssistantItem.leadingBarButtonGroups = []
+        textView.inputAssistantItem.trailingBarButtonGroups = []
+        return textView
+    }
+
+    func updateUIView(_ uiView: UITextView, context: Context) {
+        if uiView.text != text {
+            uiView.text = text
+        }
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(text: $text)
+    }
+
+    final class Coordinator: NSObject, UITextViewDelegate {
+        @Binding private var text: String
+
+        init(text: Binding<String>) {
+            _text = text
+        }
+
+        func textViewDidChange(_ textView: UITextView) {
+            text = textView.text
+        }
     }
 }

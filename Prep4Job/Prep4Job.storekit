@@ -1,0 +1,57 @@
+{
+  "identifier" : "",
+  "nonRenewingSubscriptions" : [
+  ],
+  "products" : [
+    {
+      "displayPrice" : "4.99",
+      "familyShareable" : false,
+      "internalID" : "100000001",
+      "localizations" : [
+        {
+          "description" : "Acceso Premium mensual a Prep4Job",
+          "displayName" : "Premium mensual",
+          "locale" : "es"
+        },
+        {
+          "description" : "Monthly Prep4Job Premium access",
+          "displayName" : "Monthly Premium",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "prep4job.premium.monthly",
+      "referenceName" : "Prep4Job Premium mensual",
+      "subscriptionGroupID" : "prep4job-premium",
+      "type" : "Auto-Renewable Subscription"
+    },
+    {
+      "displayPrice" : "39.99",
+      "familyShareable" : false,
+      "internalID" : "100000002",
+      "localizations" : [
+        {
+          "description" : "Acceso Premium anual a Prep4Job",
+          "displayName" : "Premium anual",
+          "locale" : "es"
+        },
+        {
+          "description" : "Annual Prep4Job Premium access",
+          "displayName" : "Annual Premium",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "prep4job.premium.yearly",
+      "referenceName" : "Prep4Job Premium anual",
+      "subscriptionGroupID" : "prep4job-premium",
+      "type" : "Auto-Renewable Subscription"
+    }
+  ],
+  "settings" : {
+    "_appStoreToolsVersion" : "15A240a",
+    "_applicationInternalID" : "",
+    "_developerTeamID" : "",
+    "_failTransactionsEnabled" : false,
+    "_locale" : "es",
+    "_storeKitConfigurationVersion" : 1
+  }
+}

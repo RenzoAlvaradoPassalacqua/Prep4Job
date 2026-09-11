@@ -1,0 +1,188 @@
+import Foundation
+
+nonisolated struct SupabaseConfiguration: Sendable {
+    let url: URL
+    let publishableKey: String
+}
+
+actor SupabaseAuthService: AuthService {
+    private let configuration: SupabaseConfiguration
+    private let sessionURL: URL
+    private let userURL: URL
+    private let urlSession: URLSession
+    private var accessToken: String?
+
+    init(configuration: SupabaseConfiguration, urlSession: URLSession = .shared) {
+        self.configuration = configuration
+        sessionURL = configuration.url.appendingPathComponent("auth/v1/token")
+        userURL = configuration.url.appendingPathComponent("auth/v1/user")
+        self.urlSession = urlSession
+    }
+
+    func restoreSession() async -> UserAccount? {
+        guard let accessToken else { return nil }
+        do {
+            return try await requestUser(accessToken: accessToken)
+        } catch {
+            self.accessToken = nil
+            return nil
+        }
+    }
+
+    func signIn(email: String, password: String) async throws -> UserAccount {
+        try await authenticate(email: email, password: password, endpoint: sessionURL)
+    }
+
+    func signUp(email: String, password: String, displayName: String) async throws -> UserAccount {
+        var request = try makeRequest(
+            url: configuration.url.appendingPathComponent("auth/v1/signup"),
+            method: "POST"
+        )
+        request.httpBody = try JSONEncoder().encode(SignUpRequest(
+            email: email,
+            password: password,
+            data: ["display_name": displayName]
+        ))
+
+        do {
+            let (data, response) = try await urlSession.data(for: request)
+            try validate(response: response)
+            let payload = try JSONDecoder().decode(SupabaseSessionResponse.self, from: data)
+            guard let user = payload.user, let account = user.account else { throw AuthError.invalidResponse }
+            accessToken = payload.accessToken
+            return account
+        } catch let error as AuthError {
+            throw error
+        } catch {
+            throw AuthError.networkUnavailable
+        }
+    }
+
+    func signOut() async {
+        guard let accessToken else { return }
+        let request = try? makeRequest(
+            url: configuration.url.appendingPathComponent("auth/v1/logout"),
+            method: "POST",
+            accessToken: accessToken
+        )
+        if let request {
+            _ = try? await urlSession.data(for: request)
+        }
+        self.accessToken = nil
+    }
+
+    func deleteAccount() async throws {
+        guard let accessToken else { throw AuthError.invalidCredentials }
+        let request = try makeRequest(
+            url: configuration.url.appendingPathComponent("functions/v1/delete-account"),
+            method: "POST",
+            accessToken: accessToken
+        )
+        let (_, response) = try await urlSession.data(for: request)
+        try validate(response: response)
+        self.accessToken = nil
+    }
+
+    private func authenticate(email: String, password: String, endpoint: URL) async throws -> UserAccount {
+        var request = try makeRequest(url: endpoint, method: "POST")
+        request.url = endpoint.appending(queryItems: [URLQueryItem(name: "grant_type", value: "password")])
+        request.httpBody = try JSONEncoder().encode(LoginRequest(email: email, password: password))
+
+        do {
+            let (data, response) = try await urlSession.data(for: request)
+            try validate(response: response)
+            let payload = try JSONDecoder().decode(SupabaseSessionResponse.self, from: data)
+            guard let user = payload.user, let account = user.account else { throw AuthError.invalidResponse }
+            accessToken = payload.accessToken
+            return account
+        } catch let error as AuthError {
+            throw error
+        } catch let error as URLError where error.code == .notConnectedToInternet {
+            throw AuthError.networkUnavailable
+        } catch {
+            throw AuthError.invalidCredentials
+        }
+    }
+
+    private func requestUser(accessToken: String) async throws -> UserAccount {
+        let request = try makeRequest(url: userURL, method: "GET", accessToken: accessToken)
+        let (data, response) = try await urlSession.data(for: request)
+        try validate(response: response)
+        let user = try JSONDecoder().decode(SupabaseUser.self, from: data)
+        guard let account = user.account else { throw AuthError.invalidResponse }
+        return account
+    }
+
+    private func makeRequest(url: URL, method: String, accessToken: String? = nil) throws -> URLRequest {
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.setValue(configuration.publishableKey, forHTTPHeaderField: "apikey")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        if let accessToken {
+            request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        }
+        return request
+    }
+
+    private func validate(response: URLResponse) throws {
+        guard let httpResponse = response as? HTTPURLResponse,
+              200 ..< 300 ~= httpResponse.statusCode
+        else {
+            throw AuthError.invalidCredentials
+        }
+    }
+}
+
+nonisolated struct LoginRequest: Encodable, Sendable {
+    let email: String
+    let password: String
+}
+
+nonisolated struct SignUpRequest: Encodable, Sendable {
+    let email: String
+    let password: String
+    let data: [String: String]
+}
+
+nonisolated struct SupabaseSessionResponse: Decodable, Sendable {
+    let accessToken: String?
+    let user: SupabaseUser?
+
+    enum CodingKeys: String, CodingKey {
+        case accessToken = "access_token"
+        case user
+    }
+}
+
+nonisolated struct SupabaseUser: Decodable, Sendable {
+    let id: UUID?
+    let email: String?
+    let createdAt: Date?
+    let userMetadata: [String: String]?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case email
+        case createdAt = "created_at"
+        case userMetadata = "user_metadata"
+    }
+
+    nonisolated var account: UserAccount? {
+        guard let id, let email else { return nil }
+        let displayName = userMetadata?["display_name"] ?? email.split(separator: "@").first.map(String.init) ?? email
+        return UserAccount(id: id, email: email, displayName: displayName, createdAt: createdAt ?? Date())
+    }
+}
+
+enum AuthServiceFactory {
+    static func makeDefault() -> any AuthService {
+        guard let urlString = Bundle.main.object(forInfoDictionaryKey: "SUPABASE_URL") as? String,
+              let url = URL(string: urlString),
+              let key = Bundle.main.object(forInfoDictionaryKey: "SUPABASE_PUBLISHABLE_KEY") as? String,
+              !key.isEmpty
+        else {
+            return LocalAuthService()
+        }
+        return SupabaseAuthService(configuration: SupabaseConfiguration(url: url, publishableKey: key))
+    }
+}

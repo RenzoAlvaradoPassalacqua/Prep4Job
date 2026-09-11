@@ -33,7 +33,13 @@ struct HomeView: View {
                             Text(L10n.Home.subtitle).font(.subheadline).foregroundStyle(.secondary)
                         }
                         Spacer()
-                        Image(systemName: "bell.badge").font(.title3).foregroundStyle(Prep4JobTheme.ink)
+                        NavigationLink {
+                            AccountView()
+                        } label: {
+                            Image(systemName: "person.crop.circle")
+                                .font(.title3)
+                                .foregroundStyle(Prep4JobTheme.ink)
+                        }
                     }
 
                     VStack(alignment: .leading, spacing: 7) {
