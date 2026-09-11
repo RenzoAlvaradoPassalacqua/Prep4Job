@@ -25,14 +25,13 @@ struct SupabaseContentRepository: PrepContentRepository {
 
     init?(session: URLSession = .shared) {
         let environment = ProcessInfo.processInfo.environment
-        guard
-            let urlString = (Bundle.main.object(forInfoDictionaryKey: "SUPABASE_URL") as? String)
-                ?? environment["SUPABASE_URL"],
-            let url = URL(string: urlString),
-            let key = (Bundle.main.object(forInfoDictionaryKey: "SUPABASE_PUBLISHABLE_KEY") as? String)
-                ?? environment["SUPABASE_PUBLISHABLE_KEY"],
-            !key.isEmpty
-        else { return nil }
+        let urlString = ((Bundle.main.object(forInfoDictionaryKey: "SUPABASE_URL") as? String)
+                ?? environment["SUPABASE_URL"]
+                ?? "https://acwfqycsiauktidsvgci.supabase.co")
+        let key = ((Bundle.main.object(forInfoDictionaryKey: "SUPABASE_PUBLISHABLE_KEY") as? String)
+                ?? environment["SUPABASE_PUBLISHABLE_KEY"]
+                ?? "sb_publishable_hf8it8jHmBjK7kAqYZUQSw_eoI74gjO")
+        guard let url = URL(string: urlString), !key.isEmpty else { return nil }
         baseURL = url
         publishableKey = key
         self.session = session
