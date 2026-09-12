@@ -108,6 +108,7 @@ actor StoreKitSubscriptionService: SubscriptionService {
 }
 
 actor DemoSubscriptionService: SubscriptionService {
+    static let shared = DemoSubscriptionService()
     private var isPremium = false
 
     func products() async throws -> [SubscriptionProduct] {
@@ -152,8 +153,8 @@ actor DemoSubscriptionService: SubscriptionService {
 
 enum SubscriptionServiceFactory {
     static func makeDefault() -> any SubscriptionService {
-        #if DEBUG
-            return DemoSubscriptionService()
+#if DEBUG
+            return DemoSubscriptionService.shared
         #else
             return StoreKitSubscriptionService()
         #endif
