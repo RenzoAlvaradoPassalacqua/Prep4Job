@@ -92,6 +92,11 @@ final class DailyQuestionViewModel: StoreViewModel {
         store.reviewCurrentQuestion(with: rating)
     }
 
+    func nextQuestion() {
+        store.nextQuestion()
+        answerState = .idle
+    }
+
     func cancelGeneration() {
         generationTask?.cancel()
         generationTask = nil

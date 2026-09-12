@@ -45,11 +45,11 @@ final class PrepStore: ObservableObject {
     private var hasLoaded = false
 
     init(
-        repository: any PrepContentRepository = DemoContentRepository(),
+        repository: (any PrepContentRepository)? = nil,
         persistence: (any ProgressPersistence)? = nil,
         reminderScheduler: (any StudyReminderScheduling)? = nil
     ) {
-        loadPreparationContent = LoadPreparationContentUseCase(repository: repository)
+        loadPreparationContent = LoadPreparationContentUseCase(repository: repository ?? ContentRepositoryFactory.makeDefault())
         self.persistence = persistence ?? ProgressPersistenceFactory.makeDefault()
         self.reminderScheduler = reminderScheduler ?? LocalNotificationScheduler()
         questions = DemoContent.questions
@@ -115,6 +115,11 @@ final class PrepStore: ObservableObject {
 
     func updateSavedAnswer(_ answer: String) {
         savedAnswer = answer
+        if let question {
+            var answers = currentSavedAnswers
+            answers[question.id] = answer
+            currentSavedAnswers = answers
+        }
         persistProgress()
     }
 
@@ -294,6 +299,7 @@ final class PrepStore: ObservableObject {
             answeredQuestionIDs: Array(answeredQuestions),
             completedConceptIDs: Array(completedConcepts),
             savedAnswer: savedAnswer,
+            savedAnswers: currentSavedAnswers,
             streak: streak,
             reviewSchedules: Array(reviewSchedules.values),
             dailyActivity: dailyActivity,
@@ -304,6 +310,18 @@ final class PrepStore: ObservableObject {
         let persistence = persistence
         Task {
             await persistence.save(snapshot)
+            await SupabaseProgressSync.shared.save(
+                snapshot,
+                questionIDs: Set(questions.map(\.id)),
+                conceptIDs: Set(concepts.map(\.id))
+            )
         }
     }
+
+    private var currentSavedAnswers: [UUID: String] {
+        get { savedAnswerStore }
+        set { savedAnswerStore = newValue }
+    }
+
+    private var savedAnswerStore: [UUID: String] = [:]
 }

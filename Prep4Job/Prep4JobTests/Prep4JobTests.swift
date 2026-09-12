@@ -169,6 +169,101 @@ struct Prep4JobTests {
         #expect(snapshot.reviewSchedules.isEmpty)
         #expect(snapshot.reminderSettings == ReminderSettings())
     }
+
+    @Test
+    func localAuthCreatesRestoresAndSignsOut() async throws {
+        let fileURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("prep4job-account-(UUID().uuidString).json")
+        let service = LocalAuthService(fileURL: fileURL)
+
+        let account = try await service.signUp(
+            email: "renzo@example.com",
+            password: "123456",
+            displayName: "Renzo"
+        )
+        let restored = await service.restoreSession()
+        let signedIn = try await service.signIn(email: account.email, password: "123456")
+
+        #expect(restored == account)
+        #expect(signedIn == account)
+
+        await service.signOut()
+        #expect(await service.restoreSession() == nil)
+        try? FileManager.default.removeItem(at: fileURL)
+    }
+
+    @Test
+    func supabaseSessionResponseDecodesTopLevelAccessToken() throws {
+        let data = Data("""
+        {
+          "access_token": "top-level-token",
+          "user": {
+            "id": "00000000-0000-0000-0000-000000000001",
+            "email": "renzo@example.com",
+            "created_at": "2026-09-11T12:00:00Z",
+            "user_metadata": { "display_name": "Renzo" }
+          }
+        }
+        """.utf8)
+
+        let payload = try JSONDecoder().decode(SupabaseSessionResponse.self, from: data)
+
+        #expect(payload.accessToken == "top-level-token")
+        #expect(payload.user?.account?.displayName == "Renzo")
+    }
+
+    @Test
+    func supabaseSessionResponseDecodesNestedSessionAccessToken() throws {
+        let data = Data("""
+        {
+          "session": {
+            "access_token": "nested-token",
+            "user": {
+              "id": "00000000-0000-0000-0000-000000000002",
+              "email": "renzo@example.com",
+              "created_at": "2026-09-11T12:00:00Z",
+              "user_metadata": { "display_name": "Renzo" }
+            }
+          }
+        }
+        """.utf8)
+
+        let payload = try JSONDecoder().decode(SupabaseSessionResponse.self, from: data)
+
+        #expect(payload.accessToken == "nested-token")
+        #expect(payload.user?.account?.email == "renzo@example.com")
+    }
+
+    @Test
+    func supabaseSignUpConfirmationResponseHasNoAccessToken() throws {
+        let data = Data("""
+        {
+          "user": {
+            "id": "00000000-0000-0000-0000-000000000003",
+            "email": "renzo@example.com",
+            "created_at": "2026-09-11T12:00:00Z",
+            "user_metadata": { "display_name": "Renzo" }
+          },
+          "session": null
+        }
+        """.utf8)
+
+        let payload = try JSONDecoder().decode(SupabaseSessionResponse.self, from: data)
+
+        #expect(payload.accessToken == nil)
+        #expect(payload.user?.account?.email == "renzo@example.com")
+    }
+
+    @Test
+    func demoSubscriptionActivatesPremium() async throws {
+        let service = DemoSubscriptionService()
+        let products = try await service.products()
+        let entitlement = try await service.purchase(productID: products[0].id)
+
+        #expect(products.count == 2)
+        #expect(entitlement.isActive)
+        #expect((await service.currentEntitlement()).isActive)
+    }
 }
 
 private struct EmptyContentRepository: PrepContentRepository {

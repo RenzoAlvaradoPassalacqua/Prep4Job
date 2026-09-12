@@ -17,6 +17,90 @@ struct DemoContentRepository: PrepContentRepository {
     }
 }
 
+/// Remote content source. Falls back to the demo repository when configuration is absent.
+struct SupabaseContentRepository: PrepContentRepository {
+    private let baseURL: URL
+    private let publishableKey: String
+    private let session: URLSession
+
+    init?(session: URLSession = .shared) {
+        let environment = ProcessInfo.processInfo.environment
+        let urlString = ((Bundle.main.object(forInfoDictionaryKey: "SUPABASE_URL") as? String)
+                ?? environment["SUPABASE_URL"]
+                ?? "https://acwfqycsiauktidsvgci.supabase.co")
+        let key = ((Bundle.main.object(forInfoDictionaryKey: "SUPABASE_PUBLISHABLE_KEY") as? String)
+                ?? environment["SUPABASE_PUBLISHABLE_KEY"]
+                ?? "sb_publishable_hf8it8jHmBjK7kAqYZUQSw_eoI74gjO")
+        guard let url = URL(string: urlString), !key.isEmpty else { return nil }
+        baseURL = url
+        publishableKey = key
+        self.session = session
+    }
+
+    func fetchQuestions() async throws -> [InterviewQuestion] {
+        let rows: [RemoteQuestion] = try await fetch(path: "interview_questions?select=*")
+        return rows.map { $0.model }
+    }
+
+    func fetchConcepts() async throws -> [LearningConcept] {
+        let rows: [RemoteConcept] = try await fetch(path: "learning_concepts?select=*")
+        return rows.map { $0.model }
+    }
+
+    private func fetch<T: Decodable>(path: String) async throws -> T {
+        guard let requestURL = URL(string: "\(baseURL.absoluteString)/rest/v1/\(path)") else {
+            throw URLError(.badURL)
+        }
+        var request = URLRequest(url: requestURL)
+        request.setValue(publishableKey, forHTTPHeaderField: "apikey")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        let (data, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse, (200..<300).contains(httpResponse.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+        return try JSONDecoder().decode(T.self, from: data)
+    }
+}
+
+private struct RemoteQuestion: Decodable {
+    let id: UUID
+    let category: String
+    let question: String
+    let answer: String
+    let concepts: [String]
+    let purpose: String
+    let tip: String
+
+    var model: InterviewQuestion {
+        InterviewQuestion(
+            id: id,
+            title: question,
+            category: category,
+            purpose: purpose,
+            tip: tip,
+            answer: answer,
+            concepts: concepts
+        )
+    }
+}
+
+private struct RemoteConcept: Decodable {
+    let id: UUID
+    let title: String
+    let summary: String
+    let detail: String
+
+    var model: LearningConcept {
+        LearningConcept(id: id, title: title, subtitle: summary, explanation: detail, steps: [], color: .indigo)
+    }
+}
+
+enum ContentRepositoryFactory {
+    static func makeDefault() -> any PrepContentRepository {
+        SupabaseContentRepository() ?? DemoContentRepository()
+    }
+}
+
 enum DemoContent {
     static let questions: [InterviewQuestion] = [
         InterviewQuestion(
