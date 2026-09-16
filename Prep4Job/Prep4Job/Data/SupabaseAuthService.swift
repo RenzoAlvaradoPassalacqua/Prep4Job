@@ -63,6 +63,7 @@ actor SupabaseAuthService: AuthService {
             }
             sessionAccessToken = accessToken
             await AuthSessionCoordinator.shared.setToken(accessToken)
+            NotificationCenter.default.post(name: .prep4jobAuthStateDidChange, object: nil)
             return account
         } catch let error as AuthError {
             throw error
@@ -83,6 +84,7 @@ actor SupabaseAuthService: AuthService {
         }
         self.sessionAccessToken = nil
         await AuthSessionCoordinator.shared.setToken(nil)
+        NotificationCenter.default.post(name: .prep4jobAuthStateDidChange, object: nil)
     }
 
     func deleteAccount() async throws {
@@ -110,6 +112,7 @@ actor SupabaseAuthService: AuthService {
             guard let accessToken = payload.accessToken else { throw AuthError.invalidResponse }
             sessionAccessToken = accessToken
             await AuthSessionCoordinator.shared.setToken(accessToken)
+            NotificationCenter.default.post(name: .prep4jobAuthStateDidChange, object: nil)
             return account
         } catch let error as AuthError {
             throw error

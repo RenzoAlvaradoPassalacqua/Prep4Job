@@ -39,12 +39,16 @@ struct SupabaseContentRepository: PrepContentRepository {
 
     func fetchQuestions() async throws -> [InterviewQuestion] {
         let rows: [RemoteQuestion] = try await fetch(path: "interview_questions?select=*")
-        return rows.map { $0.model }
+        return await MainActor.run {
+            rows.map { $0.model }
+        }
     }
 
     func fetchConcepts() async throws -> [LearningConcept] {
         let rows: [RemoteConcept] = try await fetch(path: "learning_concepts?select=*")
-        return rows.map { $0.model }
+        return await MainActor.run {
+            rows.map { $0.model }
+        }
     }
 
     private func fetch<T: Decodable>(path: String) async throws -> T {
@@ -53,6 +57,9 @@ struct SupabaseContentRepository: PrepContentRepository {
         }
         var request = URLRequest(url: requestURL)
         request.setValue(publishableKey, forHTTPHeaderField: "apikey")
+        if let token = await AuthSessionCoordinator.shared.accessToken() {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         let (data, response) = try await session.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse, (200..<300).contains(httpResponse.statusCode) else {

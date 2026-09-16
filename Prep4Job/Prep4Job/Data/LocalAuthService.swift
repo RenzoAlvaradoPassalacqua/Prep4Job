@@ -42,6 +42,7 @@ actor LocalAuthService: AuthService {
 
     func signOut() async {
         try? FileManager.default.removeItem(at: fileURL)
+        NotificationCenter.default.post(name: .prep4jobAuthStateDidChange, object: nil)
     }
 
     func deleteAccount() async throws {

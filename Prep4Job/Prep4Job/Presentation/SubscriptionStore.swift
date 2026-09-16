@@ -40,6 +40,7 @@ final class SubscriptionStore: ObservableObject {
         defer { isLoading = false }
         do {
             entitlement = try await service.purchase(productID: product.id)
+            NotificationCenter.default.post(name: .prep4jobEntitlementDidChange, object: nil)
         } catch let subscriptionError as SubscriptionError {
             self.error = subscriptionError
         } catch {
@@ -53,6 +54,7 @@ final class SubscriptionStore: ObservableObject {
         defer { isLoading = false }
         do {
             entitlement = try await service.restorePurchases()
+            NotificationCenter.default.post(name: .prep4jobEntitlementDidChange, object: nil)
         } catch let subscriptionError as SubscriptionError {
             self.error = subscriptionError
         } catch {

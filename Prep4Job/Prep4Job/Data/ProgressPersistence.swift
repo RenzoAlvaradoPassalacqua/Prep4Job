@@ -115,16 +115,20 @@ enum ProgressPersistenceFactory {
 actor SupabaseProgressSync {
     static let shared = SupabaseProgressSync()
 
-    func save(_ snapshot: ProgressSnapshot, questionIDs: Set<UUID>, conceptIDs: Set<UUID>) async {
+    func save(_ snapshot: ProgressSnapshot, contentID: UUID, kind: ReviewItemKind) async {
         guard let token = await AuthSessionCoordinator.shared.accessToken(),
               let userID = Self.userID(from: token),
               let url = URL(string: "https://acwfqycsiauktidsvgci.supabase.co/rest/v1/progress_items") else { return }
-        let rows = questionIDs.map { id in
-            ProgressRow(userID: userID, userContentID: id, kind: "question", answered: snapshot.answeredQuestionIDs.contains(id), savedAnswer: snapshot.savedAnswers[id] ?? "")
-        } + conceptIDs.map { id in
-            ProgressRow(userID: userID, userContentID: id, kind: "concept", answered: snapshot.completedConceptIDs.contains(id), savedAnswer: "")
-        }
-        guard let body = try? JSONEncoder().encode(rows) else { return }
+        let row = ProgressRow(
+            userID: userID,
+            userContentID: contentID,
+            kind: kind.rawValue,
+            answered: kind == .question
+                ? snapshot.answeredQuestionIDs.contains(contentID)
+                : snapshot.completedConceptIDs.contains(contentID),
+            savedAnswer: kind == .question ? snapshot.savedAnswers[contentID] ?? "" : ""
+        )
+        guard let body = try? JSONEncoder().encode([row]) else { return }
         var request = URLRequest(url: url.appending(queryItems: [URLQueryItem(name: "on_conflict", value: "user_id,content_id,content_kind")]))
         request.httpMethod = "POST"
         request.httpBody = body

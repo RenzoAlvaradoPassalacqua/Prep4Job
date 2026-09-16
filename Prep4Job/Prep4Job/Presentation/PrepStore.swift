@@ -43,6 +43,8 @@ final class PrepStore: ObservableObject {
     private let persistence: any ProgressPersistence
     private let reminderScheduler: any StudyReminderScheduling
     private var hasLoaded = false
+    private var persistenceTask: Task<Void, Never>?
+    private var notificationObservers: [NSObjectProtocol] = []
 
     init(
         repository: (any PrepContentRepository)? = nil,
@@ -54,6 +56,25 @@ final class PrepStore: ObservableObject {
         self.reminderScheduler = reminderScheduler ?? LocalNotificationScheduler()
         questions = DemoContent.questions
         concepts = DemoContent.concepts
+        let center = NotificationCenter.default
+        notificationObservers.append(center.addObserver(
+            forName: .prep4jobAuthStateDidChange,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in await self?.reloadContent() }
+        })
+        notificationObservers.append(center.addObserver(
+            forName: .prep4jobEntitlementDidChange,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in await self?.reloadContent() }
+        })
+    }
+
+    deinit {
+        notificationObservers.forEach(NotificationCenter.default.removeObserver)
     }
 
     var question: InterviewQuestion? {
@@ -106,6 +127,11 @@ final class PrepStore: ObservableObject {
         }
     }
 
+    func reloadContent() async {
+        hasLoaded = false
+        await load()
+    }
+
     func beginSession() {
         showingAnswer = false
         savedAnswer = ""
@@ -130,7 +156,7 @@ final class PrepStore: ObservableObject {
             answeredQuestionIDs: answeredQuestions
         )
         showingAnswer = true
-        persistProgress()
+        persistProgress(syncRemote: true, changedID: question.id, kind: .question)
     }
 
     func reviewCurrentQuestion(with rating: ReviewRating) {
@@ -145,10 +171,15 @@ final class PrepStore: ObservableObject {
 
     func nextQuestion() {
         guard !questions.isEmpty else { return }
+        let previousQuestionID = question?.id
         currentQuestion = (currentQuestion + 1) % questions.count
         showingAnswer = false
         savedAnswer = ""
-        persistProgress()
+        persistProgress(
+            syncRemote: previousQuestionID != nil,
+            changedID: previousQuestionID,
+            kind: .question
+        )
     }
 
     func complete(_ concept: LearningConcept) {
@@ -201,6 +232,7 @@ final class PrepStore: ObservableObject {
         answeredQuestions = Set(snapshot.answeredQuestionIDs).intersection(questionIDs)
         completedConcepts = Set(snapshot.completedConceptIDs).intersection(conceptIDs)
         savedAnswer = snapshot.savedAnswer
+        savedAnswerStore = snapshot.savedAnswers
         streak = snapshot.streak
         let validIDs = questionIDs.union(conceptIDs)
         reviewSchedules = Dictionary(
@@ -249,7 +281,7 @@ final class PrepStore: ObservableObject {
         if shouldRecordActivity {
             recordActivity(for: kind)
         }
-        persistProgress()
+        persistProgress(syncRemote: true, changedID: id, kind: kind)
     }
 
     private func recordActivity(for kind: ReviewItemKind, at date: Date = Date()) {
@@ -294,7 +326,11 @@ final class PrepStore: ObservableObject {
         self.lastStudyDate = day
     }
 
-    private func persistProgress() {
+    private func persistProgress(
+        syncRemote: Bool = false,
+        changedID: UUID? = nil,
+        kind: ReviewItemKind? = nil
+    ) {
         let snapshot = ProgressSnapshot(
             answeredQuestionIDs: Array(answeredQuestions),
             completedConceptIDs: Array(completedConcepts),
@@ -307,13 +343,17 @@ final class PrepStore: ObservableObject {
             lastStudyDate: lastStudyDate,
             totalStudySessions: totalStudySessions
         )
+        persistenceTask?.cancel()
         let persistence = persistence
-        Task {
+        persistenceTask = Task {
+            try? await Task.sleep(for: .milliseconds(300))
+            guard !Task.isCancelled else { return }
             await persistence.save(snapshot)
+            guard syncRemote, let changedID, let kind else { return }
             await SupabaseProgressSync.shared.save(
                 snapshot,
-                questionIDs: Set(questions.map(\.id)),
-                conceptIDs: Set(concepts.map(\.id))
+                contentID: changedID,
+                kind: kind
             )
         }
     }

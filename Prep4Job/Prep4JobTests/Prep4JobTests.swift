@@ -12,7 +12,7 @@ import Testing
 struct Prep4JobTests {
     @Test @MainActor
     func storeLoadsDemoContentAndRevealsAnswer() async {
-        let store = PrepStore()
+        let store = PrepStore(repository: DemoContentRepository())
 
         await store.load()
 
@@ -126,6 +126,7 @@ struct Prep4JobTests {
     @Test @MainActor
     func storeTracksReviewActivityAndDueItems() async {
         let store = PrepStore(
+            repository: DemoContentRepository(),
             persistence: InMemoryProgressPersistence(),
             reminderScheduler: TestReminderScheduler()
         )

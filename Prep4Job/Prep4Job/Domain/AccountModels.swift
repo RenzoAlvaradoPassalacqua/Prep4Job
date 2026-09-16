@@ -1,5 +1,10 @@
 import Foundation
 
+nonisolated extension Notification.Name {
+    static let prep4jobAuthStateDidChange = Notification.Name("Prep4Job.authStateDidChange")
+    static let prep4jobEntitlementDidChange = Notification.Name("Prep4Job.entitlementDidChange")
+}
+
 nonisolated struct UserAccount: Codable, Equatable, Sendable, Identifiable {
     let id: UUID
     let email: String
