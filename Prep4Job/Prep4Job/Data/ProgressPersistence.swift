@@ -119,7 +119,7 @@ actor SupabaseProgressSync {
         guard let token = await AuthSessionCoordinator.shared.accessToken(),
               let userID = Self.userID(from: token),
               let url = URL(string: "https://acwfqycsiauktidsvgci.supabase.co/rest/v1/progress_items") else { return }
-        let row = ProgressRow(
+        let row = SupabaseProgressRow(
             userID: userID,
             userContentID: contentID,
             kind: kind.rawValue,
@@ -129,7 +129,11 @@ actor SupabaseProgressSync {
             savedAnswer: kind == .question ? snapshot.savedAnswers[contentID] ?? "" : ""
         )
         guard let body = try? JSONEncoder().encode([row]) else { return }
-        var request = URLRequest(url: url.appending(queryItems: [URLQueryItem(name: "on_conflict", value: "user_id,content_id,content_kind")]))
+        let conflict = URLQueryItem(
+            name: "on_conflict",
+            value: "user_id,content_id,content_kind"
+        )
+        var request = URLRequest(url: url.appending(queryItems: [conflict]))
         request.httpMethod = "POST"
         request.httpBody = body
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -151,27 +155,28 @@ actor SupabaseProgressSync {
         return UUID(uuidString: subject)
     }
 
-    private struct ProgressRow: Encodable {
-        let userID: UUID
-        let contentID: UUID
-        let contentKind: String
-        let answered: Bool
-        let savedAnswer: String
+}
 
-        init(userID: UUID, userContentID: UUID, kind: String, answered: Bool, savedAnswer: String) {
-            self.userID = userID
-            contentID = userContentID
-            contentKind = kind
-            self.answered = answered
-            self.savedAnswer = savedAnswer
-        }
+nonisolated private struct SupabaseProgressRow: Encodable {
+    let userID: UUID
+    let contentID: UUID
+    let contentKind: String
+    let answered: Bool
+    let savedAnswer: String
 
-        enum CodingKeys: String, CodingKey {
-            case userID = "user_id"
-            case contentID = "content_id"
-            case contentKind = "content_kind"
-            case answered
-            case savedAnswer = "saved_answer"
-        }
+    init(userID: UUID, userContentID: UUID, kind: String, answered: Bool, savedAnswer: String) {
+        self.userID = userID
+        contentID = userContentID
+        contentKind = kind
+        self.answered = answered
+        self.savedAnswer = savedAnswer
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case userID = "user_id"
+        case contentID = "content_id"
+        case contentKind = "content_kind"
+        case answered
+        case savedAnswer = "saved_answer"
     }
 }

@@ -5,7 +5,7 @@ nonisolated enum ReviewItemKind: String, Codable, CaseIterable, Sendable {
     case concept
 }
 
-nonisolated enum ReviewRating: String, Codable, CaseIterable, Sendable, Identifiable {
+nonisolated enum ReviewRating: String, Codable, CaseIterable, Sendable, Identifiable, Equatable {
     case again
     case hard
     case good

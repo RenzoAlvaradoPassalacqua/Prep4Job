@@ -5,6 +5,7 @@ import Foundation
 final class SessionStore: ObservableObject {
     @Published private(set) var state: AuthState = .loading
     @Published private(set) var error: AuthError?
+    @Published private(set) var isLoading = false
 
     private let service: any AuthService
 
@@ -18,10 +19,12 @@ final class SessionStore: ObservableObject {
     }
 
     func restore() async {
+        isLoading = true
         state = .loading
         let account = await service.restoreSession()
         await AuthSessionCoordinator.shared.setToken(await service.accessToken())
         state = account.map(AuthState.signedIn) ?? .signedOut
+        isLoading = false
     }
 
     func signIn(email: String, password: String) async {
@@ -55,7 +58,10 @@ final class SessionStore: ObservableObject {
     }
 
     private func authenticate(_ operation: () async throws -> UserAccount) async {
+        guard !isLoading else { return }
+        isLoading = true
         error = nil
+        defer { isLoading = false }
         do {
             state = try .signedIn(await operation())
         } catch let authError as AuthError {

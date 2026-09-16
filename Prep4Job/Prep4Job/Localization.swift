@@ -3,7 +3,8 @@ import Foundation
 // Los valores de fallback contienen copy editorial; se mantiene cada mensaje
 // completo para facilitar su revisión y extracción al catálogo de traducciones.
 
-// swiftlint:disable type_body_length
+// This file intentionally keeps the app's fallback copy centralized.
+// swiftlint:disable file_length type_body_length
 // Textos visibles de Prep4Job en un único punto.
 // Los valores se resuelven mediante `String(localized:)`, por lo que se pueden
 // traducir más adelante añadiendo las claves a un catálogo de cadenas sin
@@ -12,6 +13,13 @@ import Foundation
 nonisolated enum L10n {
     nonisolated enum Common {
         static let ready = String(localized: "common.ready", defaultValue: "listo")
+        static let loading = String(localized: "common.loading", defaultValue: "Cargando...")
+        static let retry = String(localized: "common.retry", defaultValue: "Reintentar")
+        static let errorTitle = String(localized: "common.errorTitle", defaultValue: "Algo salió mal")
+        static let completed = String(localized: "common.completed", defaultValue: "Completado")
+        static let pending = String(localized: "common.pending", defaultValue: "Pendiente")
+        static let selected = String(localized: "common.selected", defaultValue: "Seleccionado")
+        static let notSelected = String(localized: "common.notSelected", defaultValue: "No seleccionado")
 
         static func percent(_ value: Int) -> String {
             String(localized: "common.percent", defaultValue: "\(value)%")
@@ -508,4 +516,4 @@ nonisolated enum L10n {
     }
 }
 
-// swiftlint:enable type_body_length
+// swiftlint:enable file_length type_body_length

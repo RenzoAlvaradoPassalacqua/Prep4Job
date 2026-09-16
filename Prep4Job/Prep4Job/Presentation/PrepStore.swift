@@ -1,5 +1,5 @@
 import Combine
-import Foundation
+@preconcurrency import Foundation
 
 enum PrepStoreError: LocalizedError, Equatable {
     case emptyContent
@@ -51,7 +51,8 @@ final class PrepStore: ObservableObject {
         persistence: (any ProgressPersistence)? = nil,
         reminderScheduler: (any StudyReminderScheduling)? = nil
     ) {
-        loadPreparationContent = LoadPreparationContentUseCase(repository: repository ?? ContentRepositoryFactory.makeDefault())
+        let contentRepository = repository ?? ContentRepositoryFactory.makeDefault()
+        loadPreparationContent = LoadPreparationContentUseCase(repository: contentRepository)
         self.persistence = persistence ?? ProgressPersistenceFactory.makeDefault()
         self.reminderScheduler = reminderScheduler ?? LocalNotificationScheduler()
         questions = DemoContent.questions
@@ -79,6 +80,10 @@ final class PrepStore: ObservableObject {
 
     var question: InterviewQuestion? {
         selectDailyQuestion.execute(questions: questions, at: currentQuestion)
+    }
+
+    var hasLoadedContent: Bool {
+        hasLoaded
     }
 
     var completion: Double {
@@ -122,8 +127,12 @@ final class PrepStore: ObservableObject {
             hasLoaded = true
         } catch let storeError as PrepStoreError {
             error = storeError
+            // Keep the last known content available so the app remains usable offline.
+            hasLoaded = !questions.isEmpty && !concepts.isEmpty
         } catch {
             self.error = .loadFailed
+            // Keep the last known content available so the app remains usable offline.
+            hasLoaded = !questions.isEmpty && !concepts.isEmpty
         }
     }
 
@@ -226,7 +235,16 @@ final class PrepStore: ObservableObject {
         persistProgress()
     }
 
-    private func restore(_ snapshot: ProgressSnapshot) {
+    private var currentSavedAnswers: [UUID: String] {
+        get { savedAnswerStore }
+        set { savedAnswerStore = newValue }
+    }
+
+    private var savedAnswerStore: [UUID: String] = [:]
+}
+
+private extension PrepStore {
+    func restore(_ snapshot: ProgressSnapshot) {
         let questionIDs = Set(questions.map(\.id))
         let conceptIDs = Set(concepts.map(\.id))
         answeredQuestions = Set(snapshot.answeredQuestionIDs).intersection(questionIDs)
@@ -243,10 +261,9 @@ final class PrepStore: ObservableObject {
         dailyActivity = snapshot.dailyActivity.sorted { $0.date < $1.date }
         reminderSettings = snapshot.reminderSettings
         totalStudySessions = snapshot.totalStudySessions
-        lastStudyDate = snapshot.lastStudyDate
     }
 
-    private func seedMissingSchedules() {
+    func seedMissingSchedules() {
         var schedules = reviewSchedules
         let now = Date()
 
@@ -267,7 +284,7 @@ final class PrepStore: ObservableObject {
         reviewSchedules = schedules
     }
 
-    private func reviewItem(
+    func reviewItem(
         id: UUID,
         kind: ReviewItemKind,
         rating: ReviewRating,
@@ -284,7 +301,7 @@ final class PrepStore: ObservableObject {
         persistProgress(syncRemote: true, changedID: id, kind: kind)
     }
 
-    private func recordActivity(for kind: ReviewItemKind, at date: Date = Date()) {
+    func recordActivity(for kind: ReviewItemKind, at date: Date = Date()) {
         let day = Calendar.current.startOfDay(for: date)
         if let index = dailyActivity.firstIndex(where: {
             Calendar.current.isDate($0.date, inSameDayAs: day)
@@ -309,7 +326,7 @@ final class PrepStore: ObservableObject {
         updateStreak(for: day)
     }
 
-    private func updateStreak(for day: Date) {
+    func updateStreak(for day: Date) {
         guard let lastStudyDate else {
             streak = 1
             lastStudyDate = day
@@ -326,7 +343,7 @@ final class PrepStore: ObservableObject {
         self.lastStudyDate = day
     }
 
-    private func persistProgress(
+    func persistProgress(
         syncRemote: Bool = false,
         changedID: UUID? = nil,
         kind: ReviewItemKind? = nil
@@ -350,18 +367,7 @@ final class PrepStore: ObservableObject {
             guard !Task.isCancelled else { return }
             await persistence.save(snapshot)
             guard syncRemote, let changedID, let kind else { return }
-            await SupabaseProgressSync.shared.save(
-                snapshot,
-                contentID: changedID,
-                kind: kind
-            )
+            await SupabaseProgressSync.shared.save(snapshot, contentID: changedID, kind: kind)
         }
     }
-
-    private var currentSavedAnswers: [UUID: String] {
-        get { savedAnswerStore }
-        set { savedAnswerStore = newValue }
-    }
-
-    private var savedAnswerStore: [UUID: String] = [:]
 }

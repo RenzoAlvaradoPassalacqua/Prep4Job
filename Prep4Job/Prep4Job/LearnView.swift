@@ -15,13 +15,21 @@ struct LearnView: View {
                         Text(L10n.Learn.title).font(.largeTitle.weight(.bold)).foregroundStyle(Prep4JobTheme.ink)
                         Text(L10n.Learn.subtitle).font(.subheadline).foregroundStyle(.secondary)
                     }
-                    ForEach(viewModel.concepts) { concept in
-                        NavigationLink {
-                            ConceptDetailView(viewModel: viewModel, concept: concept)
-                        } label: {
-                            ConceptRow(concept: concept, completed: viewModel.isCompleted(concept))
+                    if viewModel.concepts.isEmpty {
+                        EmptyStateView(
+                            title: L10n.Errors.emptyContent,
+                            message: L10n.Learn.subtitle,
+                            systemImage: "book.closed"
+                        )
+                    } else {
+                        ForEach(viewModel.concepts) { concept in
+                            NavigationLink {
+                                ConceptDetailView(viewModel: viewModel, concept: concept)
+                            } label: {
+                                ConceptRow(concept: concept, completed: viewModel.isCompleted(concept))
+                            }
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
                     }
                 }
                 .padding(20)
@@ -53,6 +61,8 @@ struct ConceptRow: View {
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .shadow(color: .black.opacity(0.04), radius: 10, y: 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityHint(Text(L10n.Learn.concept))
     }
 }
 

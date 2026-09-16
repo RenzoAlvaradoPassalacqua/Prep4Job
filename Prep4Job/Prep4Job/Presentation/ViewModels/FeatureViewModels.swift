@@ -35,6 +35,7 @@ final class DailyQuestionViewModel: StoreViewModel {
     private let answerService: any AIAnswerService
     private var generationTask: Task<Void, Never>?
     @Published private(set) var answerState: AIAnswerState = .idle
+    @Published private(set) var selectedRating: ReviewRating?
 
     init(
         store: PrepStore,
@@ -89,12 +90,14 @@ final class DailyQuestionViewModel: StoreViewModel {
     }
 
     func rateCurrentQuestion(_ rating: ReviewRating) {
+        selectedRating = rating
         store.reviewCurrentQuestion(with: rating)
     }
 
     func nextQuestion() {
         store.nextQuestion()
         answerState = .idle
+        selectedRating = nil
     }
 
     func cancelGeneration() {

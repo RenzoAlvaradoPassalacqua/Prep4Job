@@ -31,7 +31,7 @@ struct ProgressDashboardView: View {
                         }
                         .frame(height: 135)
                     }
-                    HStack(spacing: 10) {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 105), spacing: 10)], spacing: 10) {
                         StatCard(
                             value: viewModel.completedConceptCount,
                             label: L10n.Progress.concepts,
@@ -92,9 +92,7 @@ struct ProgressDashboardView: View {
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(Prep4JobTheme.indigo)
                             if let reminderError = viewModel.reminderError {
-                                Text(reminderError)
-                                    .font(.caption)
-                                    .foregroundStyle(.red)
+                                InlineStatusMessage(message: reminderError)
                             }
                         }
                     }

@@ -4,13 +4,28 @@ struct RootTabView: View {
     @ObservedObject var store: PrepStore
 
     var body: some View {
-        TabView {
-            HomeView(store: store)
-                .tabItem { Label(L10n.Tabs.home, systemImage: "house.fill") }
-            LearnView(store: store)
-                .tabItem { Label(L10n.Tabs.learn, systemImage: "book.closed.fill") }
-            ProgressDashboardView(store: store)
-                .tabItem { Label(L10n.Tabs.progress, systemImage: "chart.bar.fill") }
+        Group {
+            if !store.hasLoadedContent {
+                if store.isLoading {
+                    LoadingStateView()
+                } else if let error = store.error {
+                    ErrorStateView(message: error.localizedDescription) {
+                        Task { await store.reloadContent() }
+                    }
+                } else {
+                    LoadingStateView()
+                }
+            } else {
+                TabView {
+                    HomeView(store: store)
+                        .tabItem { Label(L10n.Tabs.home, systemImage: "house.fill") }
+                    LearnView(store: store)
+                        .tabItem { Label(L10n.Tabs.learn, systemImage: "book.closed.fill") }
+                    ProgressDashboardView(store: store)
+                        .tabItem { Label(L10n.Tabs.progress, systemImage: "chart.bar.fill") }
+                }
+                .background(Prep4JobTheme.canvas)
+            }
         }
         .background(Prep4JobTheme.canvas)
     }
@@ -56,15 +71,19 @@ struct HomeView: View {
                                 Label(L10n.Home.todayDate, systemImage: "calendar").font(.caption)
                                     .foregroundStyle(.secondary)
                             }
+                        ViewThatFits(in: .horizontal) {
                             HStack(spacing: 22) {
-                                ProgressRing(value: viewModel.completion).frame(width: 108, height: 108)
-                                VStack(alignment: .leading, spacing: 11) {
-                                    ChecklistRow(done: true, text: L10n.Home.twoConcepts)
-                                    ChecklistRow(done: true, text: L10n.Home.oneQuestion)
-                                    ChecklistRow(done: false, text: L10n.Home.onePractice)
-                                    ChecklistRow(done: false, text: L10n.Home.quickReview)
-                                }
+                                ProgressRing(value: viewModel.completion)
+                                    .frame(width: 108, height: 108)
+                                ChecklistView()
                             }
+                            VStack(alignment: .leading, spacing: 14) {
+                                ProgressRing(value: viewModel.completion)
+                                    .frame(width: 108, height: 108)
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                                ChecklistView()
+                            }
+                        }
                             PrimaryButton(title: L10n.Home.start, systemImage: "arrow.right") {
                                 viewModel.startSession()
                             }
@@ -101,6 +120,20 @@ struct ChecklistRow: View {
             Image(systemName: done ? "checkmark.circle.fill" : "circle")
                 .foregroundStyle(done ? Prep4JobTheme.mint : .gray.opacity(0.4))
             Text(text).font(.subheadline).foregroundStyle(Prep4JobTheme.ink)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(Text(text))
+        .accessibilityValue(Text(done ? L10n.Common.completed : L10n.Common.pending))
+    }
+}
+
+private struct ChecklistView: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 11) {
+            ChecklistRow(done: true, text: L10n.Home.twoConcepts)
+            ChecklistRow(done: true, text: L10n.Home.oneQuestion)
+            ChecklistRow(done: false, text: L10n.Home.onePractice)
+            ChecklistRow(done: false, text: L10n.Home.quickReview)
         }
     }
 }

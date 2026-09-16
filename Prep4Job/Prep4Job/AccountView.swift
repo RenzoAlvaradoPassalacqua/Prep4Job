@@ -17,7 +17,7 @@ struct AccountView: View {
             VStack(alignment: .leading, spacing: 20) {
                 switch session.state {
                 case .loading:
-                    ProgressView().frame(maxWidth: .infinity).padding(.top, 40)
+                    LoadingStateView()
                 case .signedOut:
                     AuthForm(session: session)
                 case let .signedIn(account):
@@ -60,25 +60,27 @@ private struct AuthForm: View {
                 TextField(L10n.Account.displayName, text: $displayName)
                     .textContentType(.name)
                     .textFieldStyle(.roundedBorder)
+                    .accessibilityLabel(L10n.Account.displayName)
             }
             TextField(L10n.Account.email, text: $email)
                 .textContentType(.emailAddress)
                 .textInputAutocapitalization(.never)
                 .keyboardType(.emailAddress)
                 .textFieldStyle(.roundedBorder)
+                .accessibilityLabel(L10n.Account.email)
             SecureField(L10n.Account.password, text: $password)
                 .textContentType(isCreatingAccount ? .newPassword : .password)
                 .textFieldStyle(.roundedBorder)
+                .accessibilityLabel(L10n.Account.password)
 
             if let error = session.error {
-                Text(error.localizedDescription)
-                    .font(.caption)
-                    .foregroundStyle(.red)
+                InlineStatusMessage(message: error.localizedDescription)
             }
 
             PrimaryButton(
                 title: isCreatingAccount ? L10n.Account.signUp : L10n.Account.signIn,
-                systemImage: isCreatingAccount ? "person.badge.plus" : "arrow.right"
+                systemImage: isCreatingAccount ? "person.badge.plus" : "arrow.right",
+                isLoading: session.isLoading
             ) {
                 Task {
                     if isCreatingAccount {
@@ -94,6 +96,7 @@ private struct AuthForm: View {
             }
             .font(.subheadline.weight(.semibold))
             .foregroundStyle(Prep4JobTheme.indigo)
+            .disabled(session.isLoading)
 
             Label(L10n.Account.developmentMode, systemImage: "hammer.fill")
                 .font(.caption)
@@ -120,11 +123,12 @@ private struct SignedInAccountView: View {
 
             PremiumCard(subscription: subscription)
 
-            Button(L10n.Account.signOut) {
+            Button(L10n.Account.signOut, role: .destructive) {
                 Task { await session.signOut() }
             }
             .font(.subheadline.weight(.semibold))
             .foregroundStyle(.red)
+            .accessibilityHint(Text(L10n.Account.signOut))
 
             NavigationLink {
                 LegalView(session: session)
@@ -156,7 +160,7 @@ private struct LegalView: View {
                 }
                 .font(.subheadline.weight(.semibold))
                 if let error = session.error {
-                    Text(error.localizedDescription).font(.caption).foregroundStyle(.red)
+                    InlineStatusMessage(message: error.localizedDescription)
                 }
             }
             .padding(20)
@@ -212,17 +216,21 @@ private struct PremiumCard: View {
                     }
                     .buttonStyle(.plain)
                     .disabled(subscription.isLoading || subscription.isPremium)
+                    .accessibilityLabel("(product.displayName), (product.displayPrice)")
+                    .accessibilityHint(Text(product.periodDescription))
                 }
             }
 
-            Button(L10n.Subscription.restore) {
+            SecondaryButton(
+                title: L10n.Subscription.restore,
+                systemImage: "arrow.clockwise",
+                isLoading: subscription.isLoading
+            ) {
                 Task { await subscription.restorePurchases() }
             }
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(Prep4JobTheme.indigo)
 
             if let error = subscription.error {
-                Text(error.localizedDescription).font(.caption).foregroundStyle(.red)
+                InlineStatusMessage(message: error.localizedDescription)
             }
         }
         .padding(18)

@@ -168,7 +168,7 @@ actor SupabaseAuthService: AuthService {
     }
 }
 
-private struct SupabaseErrorResponse: Decodable {
+nonisolated private struct SupabaseErrorResponse: Decodable {
     let message: String
 
     enum CodingKeys: String, CodingKey {
@@ -205,7 +205,7 @@ nonisolated struct SupabaseSessionResponse: Decodable, Sendable {
     }
 }
 
-private nonisolated struct SupabaseSession: Decodable, Sendable {
+nonisolated private struct SupabaseSession: Decodable, Sendable {
     let accessToken: String?
     let user: SupabaseUser?
 
@@ -235,8 +235,9 @@ nonisolated struct SupabaseUser: Decodable, Sendable {
         userMetadata = try? container.decodeIfPresent([String: String].self, forKey: .userMetadata)
         if let value = try? container.decode(String.self, forKey: .createdAt) {
             let formatter = ISO8601DateFormatter()
-            createdAt = formatter.date(from: value)
-                ?? ISO8601DateFormatter.withFractionalSeconds.date(from: value)
+            let fractionalFormatter = ISO8601DateFormatter()
+            fractionalFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            createdAt = formatter.date(from: value) ?? fractionalFormatter.date(from: value)
         } else {
             createdAt = nil
         }
@@ -247,14 +248,6 @@ nonisolated struct SupabaseUser: Decodable, Sendable {
         let displayName = userMetadata?["display_name"] ?? email.split(separator: "@").first.map(String.init) ?? email
         return UserAccount(id: id, email: email, displayName: displayName, createdAt: createdAt ?? Date())
     }
-}
-
-private extension ISO8601DateFormatter {
-    static let withFractionalSeconds: ISO8601DateFormatter = {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return formatter
-    }()
 }
 
 enum AuthServiceFactory {

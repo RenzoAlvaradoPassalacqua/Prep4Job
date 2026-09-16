@@ -40,6 +40,24 @@ struct Prep4JobTests {
     }
 
     @Test @MainActor
+    func dailyQuestionRatingStaysSelectedUntilAdvancing() async {
+        let store = PrepStore(
+            repository: DemoContentRepository(),
+            persistence: InMemoryProgressPersistence()
+        )
+        await store.load()
+        let viewModel = DailyQuestionViewModel(store: store)
+
+        viewModel.rateCurrentQuestion(.hard)
+
+        #expect(viewModel.selectedRating == .hard)
+
+        viewModel.nextQuestion()
+
+        #expect(viewModel.selectedRating == nil)
+    }
+
+    @Test @MainActor
     func storeReportsEmptyRepositoryContent() async {
         let store = PrepStore(repository: EmptyContentRepository())
 

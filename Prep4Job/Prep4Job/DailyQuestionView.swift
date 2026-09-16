@@ -49,60 +49,45 @@ struct DailyQuestionView: View {
                     case .loaded:
                         AnswerCard(viewModel: viewModel, question: question)
                     case .loading:
-                        VStack(spacing: 12) {
-                            ProgressView()
-                                .tint(Prep4JobTheme.indigo)
-                            Text(L10n.DailyQuestion.generatingAnswer)
-                                .font(.subheadline).foregroundStyle(.secondary)
-                            Button(L10n.DailyQuestion.cancelGeneration) {
-                                viewModel.cancelGeneration()
-                            }
-                            .font(.subheadline.weight(.semibold))
+                        VStack(spacing: 8) {
+                            LoadingStateView(message: L10n.DailyQuestion.generatingAnswer)
+                            SecondaryButton(
+                                title: L10n.DailyQuestion.cancelGeneration,
+                                systemImage: "xmark",
+                                action: viewModel.cancelGeneration
+                            )
+                            .frame(maxWidth: 220)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 20)
                     case let .failed(message):
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text(message)
-                                .font(.subheadline).foregroundStyle(.secondary)
-                            Button {
-                                viewModel.generateAnswer()
-                            } label: {
-                                Label(L10n.DailyQuestion.retryAnswer, systemImage: "arrow.clockwise")
-                            }
-                            .font(.subheadline.weight(.semibold))
-                        }
+                        ErrorStateView(message: message, retry: viewModel.generateAnswer)
                     case .idle:
                         VStack(spacing: 10) {
-                            Button {
-                                viewModel.generateAnswer()
-                            } label: {
-                                Label(L10n.DailyQuestion.showAIAnswer, systemImage: "sparkles")
-                                    .frame(maxWidth: .infinity).padding(.vertical, 15)
-                                    .foregroundStyle(.white).background(Prep4JobTheme.indigo)
-                                    .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
-                            }
-                            .buttonStyle(.plain)
+                            PrimaryButton(
+                                title: L10n.DailyQuestion.showAIAnswer,
+                                systemImage: "sparkles",
+                                action: viewModel.generateAnswer
+                            )
 
                             NavigationLink {
                                 AnswerEditorView(viewModel: viewModel)
                             } label: {
                                 Label(L10n.DailyQuestion.writeAnswer, systemImage: "pencil")
-                                    .frame(maxWidth: .infinity).padding(.vertical, 15)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(minHeight: 52)
                                     .foregroundStyle(Prep4JobTheme.indigo)
-                                    .overlay(RoundedRectangle(cornerRadius: 15).stroke(
-                                        Prep4JobTheme.indigo,
-                                        lineWidth: 1.2
-                                    ))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 15, style: .continuous)
+                                            .stroke(Prep4JobTheme.indigo, lineWidth: 1.2)
+                                    )
                             }
                         }
                     }
                 } else {
-                    ContentUnavailableView {
-                        Label(L10n.DailyQuestion.emptyTitle, systemImage: "questionmark.circle")
-                    } description: {
-                        Text(L10n.DailyQuestion.emptyMessage)
-                    }
+                    EmptyStateView(
+                        title: L10n.DailyQuestion.emptyTitle,
+                        message: L10n.DailyQuestion.emptyMessage,
+                        systemImage: "questionmark.circle"
+                    )
                 }
             }
             .padding(20)
@@ -127,7 +112,11 @@ struct AnswerCard: View {
             Text(L10n.DailyQuestion.answerDescription)
                 .font(.subheadline).foregroundStyle(.secondary)
             Text(viewModel.answerText).font(.subheadline).foregroundStyle(Prep4JobTheme.ink)
-            HStack(spacing: 8) {
+            LazyVGrid(
+                columns: [GridItem(.adaptive(minimum: 100), alignment: .leading)],
+                alignment: .leading,
+                spacing: 8
+            ) {
                 ForEach(viewModel.answerConcepts, id: \.self) { concept in
                     Text(concept).font(.caption.weight(.medium)).foregroundStyle(Prep4JobTheme.indigo)
                         .padding(.horizontal, 10).padding(.vertical, 7)
@@ -138,17 +127,30 @@ struct AnswerCard: View {
             Text(L10n.DailyQuestion.rateAnswer)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(Prep4JobTheme.ink)
-            HStack(spacing: 8) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: 8)], spacing: 8) {
                 ForEach(ReviewRating.allCases) { rating in
-                    Button(rating.title) {
+                    let isSelected = viewModel.selectedRating == rating
+                    Button {
                         viewModel.rateCurrentQuestion(rating)
+                    } label: {
+                        HStack(spacing: 6) {
+                            if isSelected {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .accessibilityHidden(true)
+                            }
+                            Text(rating.title)
+                        }
+                        .frame(maxWidth: .infinity)
                     }
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(Prep4JobTheme.indigo)
+                    .foregroundStyle(isSelected ? .white : Prep4JobTheme.indigo)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 9)
-                    .background(Prep4JobTheme.indigo.opacity(0.1))
+                    .frame(minHeight: 44)
+                    .background(isSelected ? Prep4JobTheme.indigo : Prep4JobTheme.indigo.opacity(0.1))
                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .accessibilityLabel(Text(rating.title))
+                    .accessibilityValue(Text(isSelected ? L10n.Common.selected : L10n.Common.notSelected))
+                    .accessibilityAddTraits(isSelected ? .isSelected : [])
                 }
             }
             Button {
@@ -157,7 +159,7 @@ struct AnswerCard: View {
                 Label(L10n.DailyQuestion.nextQuestion, systemImage: "arrow.right")
                     .font(.subheadline.weight(.semibold))
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 13)
+                    .frame(minHeight: 52)
                     .foregroundStyle(Prep4JobTheme.indigo)
                     .overlay(RoundedRectangle(cornerRadius: 13).stroke(Prep4JobTheme.indigo, lineWidth: 1.2))
             }
@@ -166,7 +168,7 @@ struct AnswerCard: View {
                 AnswerEditorView(viewModel: viewModel)
             } label: {
                 Label(L10n.DailyQuestion.personalize, systemImage: "slider.horizontal.3")
-                    .font(.subheadline.weight(.semibold)).frame(maxWidth: .infinity).padding(.vertical, 13)
+                    .font(.subheadline.weight(.semibold)).frame(maxWidth: .infinity).frame(minHeight: 52)
                     .foregroundStyle(.white).background(Prep4JobTheme.indigo)
                     .clipShape(RoundedRectangle(cornerRadius: 13))
             }
