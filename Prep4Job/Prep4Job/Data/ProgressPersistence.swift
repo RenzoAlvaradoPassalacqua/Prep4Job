@@ -1,4 +1,5 @@
 import Foundation
+import Supabase
 
 nonisolated struct ProgressSnapshot: Codable, Equatable, Sendable {
     var answeredQuestionIDs: [UUID] = []
@@ -114,11 +115,14 @@ enum ProgressPersistenceFactory {
 
 actor SupabaseProgressSync {
     static let shared = SupabaseProgressSync()
+    private let client: SupabaseClient?
+
+    init(client: SupabaseClient? = nil) {
+        self.client = client ?? SupabaseClientFactory.make()
+    }
 
     func save(_ snapshot: ProgressSnapshot, contentID: UUID, kind: ReviewItemKind) async {
-        guard let token = await AuthSessionCoordinator.shared.accessToken(),
-              let userID = Self.userID(from: token),
-              let url = URL(string: "https://acwfqycsiauktidsvgci.supabase.co/rest/v1/progress_items") else { return }
+        guard let client, let userID = client.auth.currentUser?.id else { return }
         let row = SupabaseProgressRow(
             userID: userID,
             userContentID: contentID,
@@ -128,33 +132,15 @@ actor SupabaseProgressSync {
                 : snapshot.completedConceptIDs.contains(contentID),
             savedAnswer: kind == .question ? snapshot.savedAnswers[contentID] ?? "" : ""
         )
-        guard let body = try? JSONEncoder().encode([row]) else { return }
-        let conflict = URLQueryItem(
-            name: "on_conflict",
-            value: "user_id,content_id,content_kind"
-        )
-        var request = URLRequest(url: url.appending(queryItems: [conflict]))
-        request.httpMethod = "POST"
-        request.httpBody = body
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("resolution=merge-duplicates", forHTTPHeaderField: "Prefer")
-        request.setValue(token, forHTTPHeaderField: "Authorization")
-        request.setValue("sb_publishable_hf8it8jHmBjK7kAqYZUQSw_eoI74gjO", forHTTPHeaderField: "apikey")
-        _ = try? await URLSession.shared.data(for: request)
+        do {
+            try await client
+                .from("progress_items")
+                .upsert([row], onConflict: "user_id,content_id,content_kind", returning: .minimal)
+                .execute()
+        } catch {
+            Observability.capture(error, context: ["feature": "progress_sync"])
+        }
     }
-
-    private static func userID(from token: String) -> UUID? {
-        let parts = token.split(separator: ".")
-        guard parts.count == 3 else { return nil }
-        var encoded = String(parts[1]).replacingOccurrences(of: "-", with: "+")
-            .replacingOccurrences(of: "_", with: "/")
-        encoded += String(repeating: "=", count: (4 - encoded.count % 4) % 4)
-        guard let data = Data(base64Encoded: encoded),
-              let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let subject = payload["sub"] as? String else { return nil }
-        return UUID(uuidString: subject)
-    }
-
 }
 
 nonisolated private struct SupabaseProgressRow: Encodable {

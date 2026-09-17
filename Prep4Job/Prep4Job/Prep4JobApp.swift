@@ -7,9 +7,14 @@
 
 import SwiftUI
 
+
 @main
 struct Prep4JobApp: App {
     @StateObject private var store = PrepStore()
+
+    init() {
+        Observability.start()
+    }
 
     var body: some Scene {
         WindowGroup {

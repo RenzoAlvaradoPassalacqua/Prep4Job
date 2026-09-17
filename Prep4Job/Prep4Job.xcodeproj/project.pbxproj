@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		D10000010000000000000001 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = D10000030000000000000003 /* Supabase */; };
+		D10000020000000000000002 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = D10000040000000000000004 /* Sentry */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		C98DC83B305320F000EABB92 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +57,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D10000010000000000000001 /* Supabase in Frameworks */,
+				D10000020000000000000002 /* Sentry in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -102,6 +109,7 @@
 				C98DC829305320EF00EABB92 /* Sources */,
 				C98DC82A305320EF00EABB92 /* Frameworks */,
 				C98DC82B305320EF00EABB92 /* Resources */,
+				5916C008823C40E58D7D8715 /* Upload Debug Symbols to Sentry */,
 			);
 			buildRules = (
 			);
@@ -112,6 +120,8 @@
 			);
 			name = Prep4Job;
 			packageProductDependencies = (
+				D10000030000000000000003 /* Supabase */,
+				D10000040000000000000004 /* Sentry */,
 			);
 			productName = Prep4Job;
 			productReference = C98DC82D305320EF00EABB92 /* Prep4Job.app */;
@@ -195,6 +205,10 @@
 			);
 			mainGroup = C98DC824305320EF00EABB92;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				D10000050000000000000005 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				D10000060000000000000006 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C98DC82E305320EF00EABB92 /* Products */;
 			projectDirPath = "";
@@ -230,6 +244,25 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		5916C008823C40E58D7D8715 /* Upload Debug Symbols to Sentry */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${TARGET_NAME}",
+			);
+			name = "Upload Debug Symbols to Sentry";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# This script is responsible for uploading debug symbols and source context for Sentry.\nif which sentry-cli >/dev/null; then\n  export SENTRY_ORG=ralvarado25\n  export SENTRY_PROJECT=apple-ios\n  ERROR=$(sentry-cli debug-files upload --include-sources \"$DWARF_DSYM_FOLDER_PATH\" 2>&1 >/dev/null)\n  if [ ! $? -eq 0 ]; then\n    echo \"warning: sentry-cli - $ERROR\"\n  fi\nelse\n  echo \"warning: sentry-cli not installed, download from https://github.com/getsentry/sentry-cli/releases\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		C98DC829305320EF00EABB92 /* Sources */ = {
@@ -397,8 +430,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = G8LRW2XJN6;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_SUPABASE_PUBLISHABLE_KEY = sb_publishable_hf8it8jHmBjK7kAqYZUQSw_eoI74gjO;
 				INFOPLIST_KEY_SUPABASE_URL = "https://acwfqycsiauktidsvgci.supabase.co";
@@ -432,8 +467,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = G8LRW2XJN6;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_SUPABASE_PUBLISHABLE_KEY = sb_publishable_hf8it8jHmBjK7kAqYZUQSw_eoI74gjO;
 				INFOPLIST_KEY_SUPABASE_URL = "https://acwfqycsiauktidsvgci.supabase.co";
@@ -588,6 +625,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		D10000050000000000000005 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+		D10000060000000000000006 /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/getsentry/sentry-cocoa.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D10000030000000000000003 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D10000050000000000000005 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+		D10000040000000000000004 /* Sentry */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D10000060000000000000006 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
+			productName = Sentry;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C98DC825305320EF00EABB92 /* Project object */;
 }

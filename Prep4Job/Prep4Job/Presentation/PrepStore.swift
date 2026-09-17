@@ -127,10 +127,12 @@ final class PrepStore: ObservableObject {
             hasLoaded = true
         } catch let storeError as PrepStoreError {
             error = storeError
+            Observability.capture(storeError, context: ["feature": "content_load"])
             // Keep the last known content available so the app remains usable offline.
             hasLoaded = !questions.isEmpty && !concepts.isEmpty
         } catch {
             self.error = .loadFailed
+            Observability.capture(error, context: ["feature": "content_load"])
             // Keep the last known content available so the app remains usable offline.
             hasLoaded = !questions.isEmpty && !concepts.isEmpty
         }
