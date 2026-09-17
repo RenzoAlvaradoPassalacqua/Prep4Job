@@ -14,6 +14,16 @@ enum Prep4JobTheme {
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
+
+    static let splashGradient = LinearGradient(
+        colors: [
+            Color(red: 0.34, green: 0.18, blue: 0.92),
+            Color(red: 0.12, green: 0.19, blue: 0.90),
+            Color(red: 0.03, green: 0.10, blue: 0.55)
+        ],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
 }
 
 struct Card<Content: View>: View {
