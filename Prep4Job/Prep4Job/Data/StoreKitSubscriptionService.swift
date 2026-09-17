@@ -124,6 +124,12 @@ actor DemoSubscriptionService: SubscriptionService {
                 displayName: L10n.Subscription.yearly,
                 displayPrice: "$39.99",
                 periodDescription: L10n.Subscription.yearlyPeriod
+            ),
+            SubscriptionProduct(
+                id: SubscriptionProductID.lifetime,
+                displayName: L10n.Subscription.lifetime,
+                displayPrice: "$99.99",
+                periodDescription: L10n.Subscription.lifetimePeriod
             )
         ]
     }
@@ -153,10 +159,14 @@ actor DemoSubscriptionService: SubscriptionService {
 
 enum SubscriptionServiceFactory {
     static func makeDefault() -> any SubscriptionService {
+        if RevenueCatConfiguration.isConfigured {
+            return RevenueCatSubscriptionService()
+        }
+
 #if DEBUG
-            return DemoSubscriptionService.shared
-        #else
-            return StoreKitSubscriptionService()
-        #endif
+        return DemoSubscriptionService.shared
+#else
+        return StoreKitSubscriptionService()
+#endif
     }
 }

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C98DCC97305CA39700EABB92 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = D10000080000000000000008 /* RevenueCat */; };
+		C98DCC98305CA39700EABB92 /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = D10000090000000000000009 /* RevenueCatUI */; };
 		D10000010000000000000001 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = D10000030000000000000003 /* Supabase */; };
 		D10000020000000000000002 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = D10000040000000000000004 /* Sentry */; };
 /* End PBXBuildFile section */
@@ -57,6 +59,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C98DCC97305CA39700EABB92 /* RevenueCat in Frameworks */,
+				C98DCC98305CA39700EABB92 /* RevenueCatUI in Frameworks */,
 				D10000010000000000000001 /* Supabase in Frameworks */,
 				D10000020000000000000002 /* Sentry in Frameworks */,
 			);
@@ -122,6 +126,8 @@
 			packageProductDependencies = (
 				D10000030000000000000003 /* Supabase */,
 				D10000040000000000000004 /* Sentry */,
+				D10000080000000000000008 /* RevenueCat */,
+				D10000090000000000000009 /* RevenueCatUI */,
 			);
 			productName = Prep4Job;
 			productReference = C98DC82D305320EF00EABB92 /* Prep4Job.app */;
@@ -208,6 +214,7 @@
 			packageReferences = (
 				D10000050000000000000005 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 				D10000060000000000000006 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
+				D10000070000000000000007 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C98DC82E305320EF00EABB92 /* Products */;
@@ -435,6 +442,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_REVENUECAT_API_KEY = "$(REVENUECAT_API_KEY)";
 				INFOPLIST_KEY_SUPABASE_PUBLISHABLE_KEY = sb_publishable_hf8it8jHmBjK7kAqYZUQSw_eoI74gjO;
 				INFOPLIST_KEY_SUPABASE_URL = "https://acwfqycsiauktidsvgci.supabase.co";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -449,6 +457,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = id.com.renzo.Prep4Job;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REVENUECAT_API_KEY = test_KZYDqiSpPZwtwEpnEiBZuZIJAdm;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -472,6 +481,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_REVENUECAT_API_KEY = "$(REVENUECAT_API_KEY)";
 				INFOPLIST_KEY_SUPABASE_PUBLISHABLE_KEY = sb_publishable_hf8it8jHmBjK7kAqYZUQSw_eoI74gjO;
 				INFOPLIST_KEY_SUPABASE_URL = "https://acwfqycsiauktidsvgci.supabase.co";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -486,6 +496,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = id.com.renzo.Prep4Job;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REVENUECAT_API_KEY = test_KZYDqiSpPZwtwEpnEiBZuZIJAdm;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -643,6 +654,14 @@
 				minimumVersion = 9.0.0;
 			};
 		};
+		D10000070000000000000007 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios-spm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -655,6 +674,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D10000060000000000000006 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
 			productName = Sentry;
+		};
+		D10000080000000000000008 /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D10000070000000000000007 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCat;
+		};
+		D10000090000000000000009 /* RevenueCatUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D10000070000000000000007 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCatUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

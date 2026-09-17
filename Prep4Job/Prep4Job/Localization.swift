@@ -293,11 +293,22 @@ nonisolated enum L10n {
         static let freePlan = String(localized: "subscription.freePlan", defaultValue: "Plan gratuito")
         static let monthly = String(localized: "subscription.monthly", defaultValue: "Premium mensual")
         static let yearly = String(localized: "subscription.yearly", defaultValue: "Premium anual")
+        static let lifetime = String(localized: "subscription.lifetime", defaultValue: "Acceso de por vida")
         static let monthlyPeriod = String(localized: "subscription.monthlyPeriod", defaultValue: "por mes")
         static let yearlyPeriod = String(localized: "subscription.yearlyPeriod", defaultValue: "por año")
+        static let lifetimePeriod = String(localized: "subscription.lifetimePeriod", defaultValue: "pago único")
         static let dailyPeriod = String(localized: "subscription.dailyPeriod", defaultValue: "diario")
         static let weeklyPeriod = String(localized: "subscription.weeklyPeriod", defaultValue: "semanal")
         static let restore = String(localized: "subscription.restore", defaultValue: "Restaurar compras")
+        static let paywall = String(localized: "subscription.paywall", defaultValue: "Ver planes Premium")
+        static let customerCenter = String(
+            localized: "subscription.customerCenter",
+            defaultValue: "Gestionar suscripción"
+        )
+        static let revenueCatUnavailable = String(
+            localized: "subscription.revenueCatUnavailable",
+            defaultValue: "Configura RevenueCat para ver los planes de compra."
+        )
         static let productNotFound = String(
             localized: "subscription.productNotFound",
             defaultValue: "Producto Premium no disponible."

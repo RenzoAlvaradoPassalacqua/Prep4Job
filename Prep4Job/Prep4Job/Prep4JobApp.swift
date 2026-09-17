@@ -14,6 +14,7 @@ struct Prep4JobApp: App {
 
     init() {
         Observability.start()
+        RevenueCatConfiguration.configure()
     }
 
     var body: some Scene {

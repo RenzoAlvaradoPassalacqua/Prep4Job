@@ -44,6 +44,26 @@
       "referenceName" : "Prep4Job Premium anual",
       "subscriptionGroupID" : "prep4job-premium",
       "type" : "Auto-Renewable Subscription"
+    },
+    {
+      "displayPrice" : "99.99",
+      "familyShareable" : false,
+      "internalID" : "100000003",
+      "localizations" : [
+        {
+          "description" : "Acceso Premium de por vida a Prep4Job",
+          "displayName" : "Acceso de por vida",
+          "locale" : "es"
+        },
+        {
+          "description" : "Lifetime Prep4Job Premium access",
+          "displayName" : "Lifetime Premium",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "prep4job.premium.lifetime",
+      "referenceName" : "Prep4Job Premium de por vida",
+      "type" : "Non-Consumable"
     }
   ],
   "settings" : {

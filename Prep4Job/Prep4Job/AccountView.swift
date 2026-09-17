@@ -1,4 +1,5 @@
 import SwiftUI
+import RevenueCatUI
 
 struct AccountView: View {
     @StateObject private var session: SessionStore
@@ -35,7 +36,20 @@ struct AccountView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await session.restore()
+            if let account = session.account {
+                await subscription.identify(userID: account.id)
+            }
             await subscription.load()
+        }
+        .onChange(of: session.account?.id) { _, accountID in
+            Task {
+                if let accountID {
+                    await subscription.identify(userID: accountID)
+                } else {
+                    await subscription.resetIdentity()
+                }
+                await subscription.load()
+            }
         }
     }
 }
@@ -179,6 +193,8 @@ private struct LegalView: View {
 
 private struct PremiumCard: View {
     @ObservedObject var subscription: SubscriptionStore
+    @State private var isPaywallPresented = false
+    @State private var isCustomerCenterPresented = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -229,6 +245,27 @@ private struct PremiumCard: View {
                 Task { await subscription.restorePurchases() }
             }
 
+            if RevenueCatConfiguration.isConfigured {
+                Button {
+                    isPaywallPresented = true
+                } label: {
+                    Label(L10n.Subscription.paywall, systemImage: "sparkles")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(Prep4JobTheme.indigo)
+                .disabled(subscription.isLoading || subscription.isPremium)
+
+                Button {
+                    isCustomerCenterPresented = true
+                } label: {
+                    Label(L10n.Subscription.customerCenter, systemImage: "person.crop.circle.badge.checkmark")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .tint(Prep4JobTheme.indigo)
+            }
+
             if let error = subscription.error {
                 InlineStatusMessage(message: error.localizedDescription)
             }
@@ -236,5 +273,16 @@ private struct PremiumCard: View {
         .padding(18)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .sheet(isPresented: $isPaywallPresented) {
+            RevenueCatPaywallView()
+                .onDisappear { Task { await subscription.load() } }
+        }
+        .sheet(isPresented: $isCustomerCenterPresented) {
+            CustomerCenterView()
+                .onCustomerCenterRestoreCompleted { _ in
+                    Task { await subscription.load() }
+                }
+                .onDisappear { Task { await subscription.load() } }
+        }
     }
 }
