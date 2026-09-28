@@ -290,6 +290,7 @@ nonisolated enum L10n {
             localized: "subscription.premiumActive",
             defaultValue: "Premium activo"
         )
+        static let premiumBadge = String(localized: "subscription.premiumBadge", defaultValue: "PREMIUM")
         static let freePlan = String(localized: "subscription.freePlan", defaultValue: "Plan gratuito")
         static let monthly = String(localized: "subscription.monthly", defaultValue: "Premium mensual")
         static let yearly = String(localized: "subscription.yearly", defaultValue: "Premium anual")

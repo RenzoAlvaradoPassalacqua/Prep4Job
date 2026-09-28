@@ -273,6 +273,19 @@ private struct PremiumCard: View {
         .padding(18)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay(alignment: .topTrailing) {
+            if subscription.isPremium {
+                Label(L10n.Subscription.premiumBadge, systemImage: "checkmark.seal.fill")
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Prep4JobTheme.mint)
+                    .clipShape(Capsule())
+                    .padding(12)
+                    .accessibilityLabel(Text(L10n.Subscription.premiumActive))
+            }
+        }
         .sheet(isPresented: $isPaywallPresented) {
             RevenueCatPaywallView()
                 .onDisappear { Task { await subscription.load() } }
