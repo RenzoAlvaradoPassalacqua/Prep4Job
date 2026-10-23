@@ -1,5 +1,4 @@
 import Foundation
-import Sentry
 
 nonisolated enum Observability {
     nonisolated(unsafe) private static var isStarted = false
@@ -10,25 +9,15 @@ nonisolated enum Observability {
         #else
         guard !isStarted else { return }
         isStarted = true
-        let environment = ProcessInfo.processInfo.environment
-        let dsn = (Bundle.main.object(forInfoDictionaryKey: "SENTRY_DSN") as? String)
-            ?? environment["SENTRY_DSN"]
-        guard let dsn, !dsn.isEmpty else { return }
-        SentrySDK.start { options in
-            options.dsn = dsn
-            options.environment = environment["APP_ENVIRONMENT"] ?? "development"
-            options.tracesSampleRate = 0
-            options.enableAutoPerformanceTracing = false
-            options.enableTimeToFullDisplayTracing = false
-            options.enableAutoSessionTracking = true
-        }
+        // Sentry removed: previously read DSN and started SentrySDK. Now a no-op.
+        // If you had environment-based configuration, keep it here for future providers.
+        _ = ProcessInfo.processInfo.environment["APP_ENVIRONMENT"]
         #endif
     }
 
     static func capture(_ error: Error, context: [String: String] = [:]) {
+        // Sentry removed: previously captured errors via SentrySDK. Now a no-op.
         guard isStarted else { return }
-        SentrySDK.capture(error: error) { scope in
-            context.forEach { scope.setTag(value: $0.value, key: $0.key) }
-        }
+        _ = context // Preserve parameter to avoid unused warnings.
     }
 }

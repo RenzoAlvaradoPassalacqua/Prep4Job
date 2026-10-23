@@ -10,7 +10,6 @@
 		C98DCC97305CA39700EABB92 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = D10000080000000000000008 /* RevenueCat */; };
 		C98DCC98305CA39700EABB92 /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = D10000090000000000000009 /* RevenueCatUI */; };
 		D10000010000000000000001 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = D10000030000000000000003 /* Supabase */; };
-		D10000020000000000000002 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = D10000040000000000000004 /* Sentry */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,9 +35,22 @@
 		C98DC844305320F000EABB92 /* Prep4JobUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Prep4JobUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C96C85B93085E13F00CAB580 /* Exceptions for "Prep4Job" folder in "Prep4Job" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = C98DC82C305320EF00EABB92 /* Prep4Job */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		C98DC82F305320EF00EABB92 /* Prep4Job */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C96C85B93085E13F00CAB580 /* Exceptions for "Prep4Job" folder in "Prep4Job" target */,
+			);
 			path = Prep4Job;
 			sourceTree = "<group>";
 		};
@@ -62,7 +74,6 @@
 				C98DCC97305CA39700EABB92 /* RevenueCat in Frameworks */,
 				C98DCC98305CA39700EABB92 /* RevenueCatUI in Frameworks */,
 				D10000010000000000000001 /* Supabase in Frameworks */,
-				D10000020000000000000002 /* Sentry in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,7 +136,6 @@
 			name = Prep4Job;
 			packageProductDependencies = (
 				D10000030000000000000003 /* Supabase */,
-				D10000040000000000000004 /* Sentry */,
 				D10000080000000000000008 /* RevenueCat */,
 				D10000090000000000000009 /* RevenueCatUI */,
 			);
@@ -213,7 +223,6 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				D10000050000000000000005 /* XCRemoteSwiftPackageReference "supabase-swift" */,
-				D10000060000000000000006 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
 				D10000070000000000000007 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -435,6 +444,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -442,6 +452,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Prep4Job/Info.plist;
 				INFOPLIST_KEY_REVENUECAT_API_KEY = "$(REVENUECAT_API_KEY)";
 				INFOPLIST_KEY_SUPABASE_PUBLISHABLE_KEY = sb_publishable_hf8it8jHmBjK7kAqYZUQSw_eoI74gjO;
 				INFOPLIST_KEY_SUPABASE_URL = "https://acwfqycsiauktidsvgci.supabase.co";
@@ -457,6 +468,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = id.com.renzo.Prep4Job;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				REVENUECAT_API_KEY = test_KZYDqiSpPZwtwEpnEiBZuZIJAdm;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -474,6 +486,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -481,6 +494,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Prep4Job/Info.plist;
 				INFOPLIST_KEY_REVENUECAT_API_KEY = "$(REVENUECAT_API_KEY)";
 				INFOPLIST_KEY_SUPABASE_PUBLISHABLE_KEY = sb_publishable_hf8it8jHmBjK7kAqYZUQSw_eoI74gjO;
 				INFOPLIST_KEY_SUPABASE_URL = "https://acwfqycsiauktidsvgci.supabase.co";
@@ -496,6 +510,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = id.com.renzo.Prep4Job;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				REVENUECAT_API_KEY = test_KZYDqiSpPZwtwEpnEiBZuZIJAdm;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -645,14 +660,8 @@
 				kind = upToNextMajorVersion;
 				minimumVersion = 2.0.0;
 			};
-		};
-		D10000060000000000000006 /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/getsentry/sentry-cocoa.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 9.0.0;
-			};
+			traits = (
+			);
 		};
 		D10000070000000000000007 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -669,11 +678,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D10000050000000000000005 /* XCRemoteSwiftPackageReference "supabase-swift" */;
 			productName = Supabase;
-		};
-		D10000040000000000000004 /* Sentry */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = D10000060000000000000006 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
-			productName = Sentry;
 		};
 		D10000080000000000000008 /* RevenueCat */ = {
 			isa = XCSwiftPackageProductDependency;
