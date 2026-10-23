@@ -103,6 +103,19 @@ Verificación realizada:
 - Instalación y ejecución en simulador: correcta.
 Actualmente funciona en modo local/Demo, por lo que no necesitas todavía cuenta de Apple Developer ni Supabase. Para producción faltaría configurar Supabase, crear los productos en App Store Connect y añadir persistencia segura de sesión mediante Keychain.
 
+RevenueCat
+- SPM oficial: `https://github.com/RevenueCat/purchases-ios-spm.git`. El proyecto enlaza los productos `RevenueCat` y `RevenueCatUI` (versión resuelta 5.90.1).
+- El SDK se configura al iniciar la app mediante `RevenueCatConfiguration` con la clave pública de prueba `test_...` proporcionada para este proyecto.
+- `SubscriptionServiceFactory` usa `RevenueCatSubscriptionService` cuando RevenueCat está configurado; sin configuración conserva Demo en Debug y StoreKit 2 en Release.
+- Entitlement esperado en RevenueCat: `prep4job_pro`.
+- Crea estos productos en RevenueCat y asígnalos al offering actual:
+  - `prep4job.premium.lifetime` (Lifetime)
+  - `prep4job.premium.yearly` (Yearly)
+  - `prep4job.premium.monthly` (Monthly)
+- `PremiumCard` presenta el Paywall remoto con `RevenueCatUI.PaywallView` y ofrece `CustomerCenterView` para gestionar/restaurar compras.
+
+La clave pública de RevenueCat puede incluirse en el cliente; nunca uses una clave secreta del dashboard dentro de la app. Configura el entitlement, offering y productos en el dashboard antes de probar compras.
+
 
 Implementé todo lo que puede quedar preparado en el repositorio sin credenciales externas.
 Backend Supabase
@@ -129,6 +142,7 @@ Creé configuración local para probar suscripciones:
 Incluye:
 - prep4job.premium.monthly
 - prep4job.premium.yearly
+- prep4job.premium.lifetime
 También agregué eliminación de cuenta, privacidad y términos en [AccountView.swift](/Users/renzo/Documents/Prep4Job/Prep4Job/Prep4Job/AccountView.swift).
 Estado real
 La implementación técnica está preparada, pero todavía debes realizar manualmente:
@@ -140,5 +154,3 @@ La implementación técnica está preparada, pero todavía debes realizar manual
 6. Configurar Sandbox y webhook.
 7. Revisar legalmente los textos de privacidad y términos.
 La app compila correctamente, SwiftLint queda en cero y las 13 pruebas unitarias pasan.
-
-

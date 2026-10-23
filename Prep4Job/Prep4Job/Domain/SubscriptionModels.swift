@@ -52,10 +52,18 @@ nonisolated protocol SubscriptionService: Sendable {
     func purchase(productID: String) async throws -> SubscriptionEntitlement
     func restorePurchases() async throws -> SubscriptionEntitlement
     func currentEntitlement() async -> SubscriptionEntitlement
+    func identify(userID: String) async
+    func resetIdentity() async
+}
+
+extension SubscriptionService {
+    func identify(userID: String) async {}
+    func resetIdentity() async {}
 }
 
 nonisolated enum SubscriptionProductID {
     static let monthly = "prep4job.premium.monthly"
     static let yearly = "prep4job.premium.yearly"
-    static let all = [monthly, yearly]
+    static let lifetime = "prep4job.premium.lifetime"
+    static let all = [monthly, yearly, lifetime]
 }

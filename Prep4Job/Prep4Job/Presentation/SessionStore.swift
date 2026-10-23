@@ -52,8 +52,10 @@ final class SessionStore: ObservableObject {
             state = .signedOut
         } catch let authError as AuthError {
             self.error = authError
+            Observability.capture(authError, context: ["feature": "account_deletion"])
         } catch {
             self.error = .networkUnavailable
+            Observability.capture(error, context: ["feature": "account_deletion"])
         }
     }
 
@@ -66,8 +68,10 @@ final class SessionStore: ObservableObject {
             state = try .signedIn(await operation())
         } catch let authError as AuthError {
             self.error = authError
+            Observability.capture(authError, context: ["feature": "auth"])
         } catch {
             self.error = .networkUnavailable
+            Observability.capture(error, context: ["feature": "auth"])
         }
     }
 }

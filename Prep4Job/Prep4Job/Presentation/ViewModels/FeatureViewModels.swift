@@ -119,6 +119,7 @@ final class DailyQuestionViewModel: StoreViewModel {
             answerState = .idle
         } catch {
             answerState = .failed(error.localizedDescription)
+            Observability.capture(error, context: ["feature": "answer_generation"])
         }
     }
 }

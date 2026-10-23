@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C98DCC97305CA39700EABB92 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = D10000080000000000000008 /* RevenueCat */; };
+		C98DCC98305CA39700EABB92 /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = D10000090000000000000009 /* RevenueCatUI */; };
+		D10000010000000000000001 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = D10000030000000000000003 /* Supabase */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		C98DC83B305320F000EABB92 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -29,9 +35,22 @@
 		C98DC844305320F000EABB92 /* Prep4JobUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Prep4JobUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C96C85B93085E13F00CAB580 /* Exceptions for "Prep4Job" folder in "Prep4Job" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = C98DC82C305320EF00EABB92 /* Prep4Job */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		C98DC82F305320EF00EABB92 /* Prep4Job */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C96C85B93085E13F00CAB580 /* Exceptions for "Prep4Job" folder in "Prep4Job" target */,
+			);
 			path = Prep4Job;
 			sourceTree = "<group>";
 		};
@@ -52,6 +71,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C98DCC97305CA39700EABB92 /* RevenueCat in Frameworks */,
+				C98DCC98305CA39700EABB92 /* RevenueCatUI in Frameworks */,
+				D10000010000000000000001 /* Supabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -102,6 +124,7 @@
 				C98DC829305320EF00EABB92 /* Sources */,
 				C98DC82A305320EF00EABB92 /* Frameworks */,
 				C98DC82B305320EF00EABB92 /* Resources */,
+				5916C008823C40E58D7D8715 /* Upload Debug Symbols to Sentry */,
 			);
 			buildRules = (
 			);
@@ -112,6 +135,9 @@
 			);
 			name = Prep4Job;
 			packageProductDependencies = (
+				D10000030000000000000003 /* Supabase */,
+				D10000080000000000000008 /* RevenueCat */,
+				D10000090000000000000009 /* RevenueCatUI */,
 			);
 			productName = Prep4Job;
 			productReference = C98DC82D305320EF00EABB92 /* Prep4Job.app */;
@@ -195,6 +221,10 @@
 			);
 			mainGroup = C98DC824305320EF00EABB92;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				D10000050000000000000005 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				D10000070000000000000007 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C98DC82E305320EF00EABB92 /* Products */;
 			projectDirPath = "";
@@ -230,6 +260,25 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		5916C008823C40E58D7D8715 /* Upload Debug Symbols to Sentry */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${TARGET_NAME}",
+			);
+			name = "Upload Debug Symbols to Sentry";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# This script is responsible for uploading debug symbols and source context for Sentry.\nif which sentry-cli >/dev/null; then\n  export SENTRY_ORG=ralvarado25\n  export SENTRY_PROJECT=apple-ios\n  ERROR=$(sentry-cli debug-files upload --include-sources \"$DWARF_DSYM_FOLDER_PATH\" 2>&1 >/dev/null)\n  if [ ! $? -eq 0 ]; then\n    echo \"warning: sentry-cli - $ERROR\"\n  fi\nelse\n  echo \"warning: sentry-cli not installed, download from https://github.com/getsentry/sentry-cli/releases\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		C98DC829305320EF00EABB92 /* Sources */ = {
@@ -395,11 +444,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = G8LRW2XJN6;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Prep4Job/Info.plist;
+				INFOPLIST_KEY_REVENUECAT_API_KEY = "$(REVENUECAT_API_KEY)";
 				INFOPLIST_KEY_SUPABASE_PUBLISHABLE_KEY = sb_publishable_hf8it8jHmBjK7kAqYZUQSw_eoI74gjO;
 				INFOPLIST_KEY_SUPABASE_URL = "https://acwfqycsiauktidsvgci.supabase.co";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -414,6 +468,8 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = id.com.renzo.Prep4Job;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				REVENUECAT_API_KEY = test_KZYDqiSpPZwtwEpnEiBZuZIJAdm;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -430,11 +486,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = G8LRW2XJN6;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Prep4Job/Info.plist;
+				INFOPLIST_KEY_REVENUECAT_API_KEY = "$(REVENUECAT_API_KEY)";
 				INFOPLIST_KEY_SUPABASE_PUBLISHABLE_KEY = sb_publishable_hf8it8jHmBjK7kAqYZUQSw_eoI74gjO;
 				INFOPLIST_KEY_SUPABASE_URL = "https://acwfqycsiauktidsvgci.supabase.co";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -449,6 +510,8 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = id.com.renzo.Prep4Job;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				REVENUECAT_API_KEY = test_KZYDqiSpPZwtwEpnEiBZuZIJAdm;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -588,6 +651,45 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		D10000050000000000000005 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+			traits = (
+			);
+		};
+		D10000070000000000000007 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios-spm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D10000030000000000000003 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D10000050000000000000005 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+		D10000080000000000000008 /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D10000070000000000000007 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCat;
+		};
+		D10000090000000000000009 /* RevenueCatUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D10000070000000000000007 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCatUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C98DC825305320EF00EABB92 /* Project object */;
 }

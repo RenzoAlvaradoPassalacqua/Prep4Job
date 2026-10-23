@@ -18,6 +18,14 @@ final class SubscriptionStore: ObservableObject {
         entitlement.isActive
     }
 
+    func identify(userID: UUID) async {
+        await service.identify(userID: userID.uuidString)
+    }
+
+    func resetIdentity() async {
+        await service.resetIdentity()
+    }
+
     func load() async {
         guard !isLoading else { return }
         isLoading = true
