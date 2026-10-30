@@ -6,11 +6,27 @@ nonisolated protocol PrepContentRepository: Sendable {
     func fetchConcepts() async throws -> [LearningConcept]
 }
 
+protocol PremiumAccessPolicy: Sendable {
+    var isPremium: Bool { get }
+}
+
+struct AlwaysFreePolicy: PremiumAccessPolicy {
+    let isPremium = false
+}
+
 /// Fuente local de contenido para el MVP. En producción puede sustituirse por
 /// una implementación remota sin modificar la capa de presentación.
 struct DemoContentRepository: PrepContentRepository {
+    private let policy: PremiumAccessPolicy
+
+    init(policy: PremiumAccessPolicy = AlwaysFreePolicy()) {
+        self.policy = policy
+    }
+
     func fetchQuestions() async throws -> [InterviewQuestion] {
-        await DemoContent.questions
+        // Capture premium flag outside of the nonisolated closure to avoid actor isolation warning
+        let isPremium: Bool = await MainActor.run { policy.isPremium }
+        return await DemoContent.questions.filter { !$0.requiresPremium || isPremium }
     }
 
     func fetchConcepts() async throws -> [LearningConcept] {
@@ -21,10 +37,12 @@ struct DemoContentRepository: PrepContentRepository {
 /// Remote content source. Falls back to the demo repository when configuration is absent.
 struct SupabaseContentRepository: PrepContentRepository {
     private let client: SupabaseClient
+    private let policy: PremiumAccessPolicy
 
-    init?(client: SupabaseClient? = nil) {
+    init?(client: SupabaseClient? = nil, policy: PremiumAccessPolicy = AlwaysFreePolicy()) {
         guard let client = client ?? SupabaseClientFactory.make() else { return nil }
         self.client = client
+        self.policy = policy
     }
 
     func fetchQuestions() async throws -> [InterviewQuestion] {
@@ -33,9 +51,11 @@ struct SupabaseContentRepository: PrepContentRepository {
             .select()
             .execute()
             .value
-        return await MainActor.run {
+        let models = await MainActor.run {
             rows.map { $0.model }
         }
+        let isPremium: Bool = await MainActor.run { policy.isPremium }
+        return models.filter { !$0.requiresPremium || isPremium }
     }
 
     func fetchConcepts() async throws -> [LearningConcept] {
@@ -59,6 +79,7 @@ private struct RemoteQuestion: Decodable {
     let concepts: [String]
     let purpose: String
     let tip: String
+    let requiresPremium: Bool?
 
     var model: InterviewQuestion {
         InterviewQuestion(
@@ -85,8 +106,8 @@ private struct RemoteConcept: Decodable {
 }
 
 enum ContentRepositoryFactory {
-    static func makeDefault() -> any PrepContentRepository {
-        SupabaseContentRepository() ?? DemoContentRepository()
+    static func makeDefault(premiumPolicy: PremiumAccessPolicy = AlwaysFreePolicy()) -> any PrepContentRepository {
+        SupabaseContentRepository(policy: premiumPolicy) ?? DemoContentRepository(policy: premiumPolicy)
     }
 }
 
@@ -122,6 +143,24 @@ enum DemoContent {
                 L10n.Concepts.communication,
                 L10n.Questions.continuousLearning
             ]
+        ),
+        InterviewQuestion(
+            id: stableID("00000000-0000-0000-0000-000000000004"),
+            title: "Handling Ambiguous Requirements",
+            category: L10n.Questions.problemSolving,
+            purpose: "Demonstrate how you manage unclear project requirements.",
+            tip: "Clarify assumptions and communicate proactively.",
+            answer: "I start by asking clarifying questions and engage stakeholders to define expectations.",
+            concepts: [L10n.Questions.structuredThinking, L10n.Concepts.communication]
+        ),
+        InterviewQuestion(
+            id: stableID("00000000-0000-0000-0000-000000000005"),
+            title: "Leading Remote Teams Effectively",
+            category: L10n.Questions.leadership,
+            purpose: "Showcase your leadership in a remote environment.",
+            tip: "Focus on clear communication and trust-building.",
+            answer: "I establish regular check-ins, set clear goals, and encourage open communication across the team.",
+            concepts: [L10n.Concepts.communication, L10n.Questions.leadership]
         )
     ]
 
@@ -181,3 +220,4 @@ enum DemoContent {
         UUID(uuidString: value) ?? UUID()
     }
 }
+

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C96C86A3308C172200CAB580 /* IssueReporting in Frameworks */ = {isa = PBXBuildFile; productRef = C96C86A2308C172200CAB580 /* IssueReporting */; };
 		C98DCC97305CA39700EABB92 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = D10000080000000000000008 /* RevenueCat */; };
 		C98DCC98305CA39700EABB92 /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = D10000090000000000000009 /* RevenueCatUI */; };
 		D10000010000000000000001 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = D10000030000000000000003 /* Supabase */; };
@@ -72,6 +73,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C98DCC97305CA39700EABB92 /* RevenueCat in Frameworks */,
+				C96C86A3308C172200CAB580 /* IssueReporting in Frameworks */,
 				C98DCC98305CA39700EABB92 /* RevenueCatUI in Frameworks */,
 				D10000010000000000000001 /* Supabase in Frameworks */,
 			);
@@ -138,6 +140,7 @@
 				D10000030000000000000003 /* Supabase */,
 				D10000080000000000000008 /* RevenueCat */,
 				D10000090000000000000009 /* RevenueCatUI */,
+				C96C86A2308C172200CAB580 /* IssueReporting */,
 			);
 			productName = Prep4Job;
 			productReference = C98DC82D305320EF00EABB92 /* Prep4Job.app */;
@@ -224,6 +227,7 @@
 			packageReferences = (
 				D10000050000000000000005 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 				D10000070000000000000007 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
+				C96C86A1308C172200CAB580 /* XCRemoteSwiftPackageReference "swift-issue-reporting" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C98DC82E305320EF00EABB92 /* Products */;
@@ -653,6 +657,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		C96C86A1308C172200CAB580 /* XCRemoteSwiftPackageReference "swift-issue-reporting" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-issue-reporting";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.1.2;
+			};
+		};
 		D10000050000000000000005 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/supabase/supabase-swift.git";
@@ -674,6 +686,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		C96C86A2308C172200CAB580 /* IssueReporting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C96C86A1308C172200CAB580 /* XCRemoteSwiftPackageReference "swift-issue-reporting" */;
+			productName = IssueReporting;
+		};
 		D10000030000000000000003 /* Supabase */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = D10000050000000000000005 /* XCRemoteSwiftPackageReference "supabase-swift" */;

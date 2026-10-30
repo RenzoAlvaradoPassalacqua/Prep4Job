@@ -8,6 +8,7 @@ struct InterviewQuestion: Identifiable, Hashable, Codable, Sendable {
     let tip: String
     let answer: String
     let concepts: [String]
+    let requiresPremium: Bool
 
     init(
         id: UUID = UUID(),
@@ -16,7 +17,8 @@ struct InterviewQuestion: Identifiable, Hashable, Codable, Sendable {
         purpose: String,
         tip: String,
         answer: String,
-        concepts: [String]
+        concepts: [String],
+        requiresPremium: Bool = false
     ) {
         self.id = id
         self.title = title
@@ -25,6 +27,35 @@ struct InterviewQuestion: Identifiable, Hashable, Codable, Sendable {
         self.tip = tip
         self.answer = answer
         self.concepts = concepts
+        self.requiresPremium = requiresPremium
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, title, category, purpose, tip, answer, concepts, requiresPremium
+    }
+
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        self.title = try container.decode(String.self, forKey: .title)
+        self.category = try container.decode(String.self, forKey: .category)
+        self.purpose = try container.decode(String.self, forKey: .purpose)
+        self.tip = try container.decode(String.self, forKey: .tip)
+        self.answer = try container.decode(String.self, forKey: .answer)
+        self.concepts = try container.decode([String].self, forKey: .concepts)
+        self.requiresPremium = try container.decodeIfPresent(Bool.self, forKey: .requiresPremium) ?? false
+    }
+
+    func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(title, forKey: .title)
+        try container.encode(category, forKey: .category)
+        try container.encode(purpose, forKey: .purpose)
+        try container.encode(tip, forKey: .tip)
+        try container.encode(answer, forKey: .answer)
+        try container.encode(concepts, forKey: .concepts)
+        try container.encode(requiresPremium, forKey: .requiresPremium)
     }
 }
 
