@@ -13,7 +13,7 @@ struct ProgressDashboardView: View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 18) {
                     Text(L10n.Progress.title).font(.largeTitle.weight(.bold)).foregroundStyle(Prep4JobTheme.ink)
-                    Text(L10n.Progress.subtitle).font(.subheadline).foregroundStyle(.secondary)
+                    Text(L10n.Progress.subtitle).font(.subheadline).foregroundStyle(.black)
                     Card {
                         HStack(alignment: .bottom, spacing: 11) {
                             ForEach(Array(viewModel.weeklyActivityValues.enumerated()), id: \.offset) { index, value in
@@ -24,7 +24,7 @@ struct ProgressDashboardView: View {
                                             width: 22,
                                             height: CGFloat(max(10, 100 * value))
                                         )
-                                    Text(days[index]).font(.caption2).foregroundStyle(.secondary)
+                                    Text(days[index]).font(.caption2).foregroundStyle(.black)
                                 }
                                 .frame(maxWidth: .infinity, alignment: .bottom)
                             }
@@ -58,7 +58,7 @@ struct ProgressDashboardView: View {
                                 Text(L10n.Progress.reviewToday(count: viewModel.dueReviewCount))
                                     .font(.headline.weight(.bold))
                                     .foregroundStyle(Prep4JobTheme.ink)
-                                Text(L10n.Progress.reviewDescription).font(.caption).foregroundStyle(.secondary)
+                                Text(L10n.Progress.reviewDescription).font(.caption).foregroundStyle(.black)
                                 Text(L10n.Progress.reviewProgress(
                                     reviewed: viewModel.reviewedItemCount,
                                     total: viewModel.totalReviewItemCount
@@ -81,7 +81,7 @@ struct ProgressDashboardView: View {
                                     : L10n.Progress.remindersDisabled
                             )
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.black)
                             Button(
                                 viewModel.reminderEnabled
                                     ? L10n.Progress.disableReminder
@@ -118,7 +118,7 @@ struct StatCard: View {
         VStack(alignment: .leading, spacing: 8) {
             Image(systemName: icon).foregroundStyle(color)
             Text(value, format: .number).font(.title2.weight(.bold)).foregroundStyle(Prep4JobTheme.ink)
-            Text(label).font(.caption).foregroundStyle(.secondary)
+            Text(label).font(.caption).foregroundStyle(.black)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
