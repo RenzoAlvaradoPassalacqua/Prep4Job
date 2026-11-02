@@ -65,27 +65,54 @@ private struct AuthForm: View {
         VStack(alignment: .leading, spacing: 16) {
             Text(isCreatingAccount ? L10n.Account.createTitle : L10n.Account.signInTitle)
                 .font(.largeTitle.weight(.bold))
-                .foregroundStyle(Prep4JobTheme.ink)
+                .foregroundStyle(.black)
             Text(L10n.Subscription.subtitle)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.black)
 
             if isCreatingAccount {
-                TextField(L10n.Account.displayName, text: $displayName)
-                    .textContentType(.name)
-                    .textFieldStyle(.roundedBorder)
-                    .accessibilityLabel(L10n.Account.displayName)
+                TextField(
+                    L10n.Account.displayName,
+                    text: $displayName,
+                    prompt: Text(L10n.Account.displayName).foregroundStyle(.black)
+                )
+                .textContentType(.name)
+                .textFieldStyle(.plain)
+                .foregroundStyle(.black)
+                .padding(12)
+                .background(Prep4JobTheme.card)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.gray.opacity(0.15)))
+                .accessibilityLabel(L10n.Account.displayName)
             }
-            TextField(L10n.Account.email, text: $email)
-                .textContentType(.emailAddress)
-                .textInputAutocapitalization(.never)
-                .keyboardType(.emailAddress)
-                .textFieldStyle(.roundedBorder)
-                .accessibilityLabel(L10n.Account.email)
-            SecureField(L10n.Account.password, text: $password)
-                .textContentType(isCreatingAccount ? .newPassword : .password)
-                .textFieldStyle(.roundedBorder)
-                .accessibilityLabel(L10n.Account.password)
+            TextField(
+                L10n.Account.email,
+                text: $email,
+                prompt: Text(L10n.Account.email).foregroundStyle(.black)
+            )
+            .textContentType(.emailAddress)
+            .textInputAutocapitalization(.never)
+            .keyboardType(.emailAddress)
+            .textFieldStyle(.plain)
+            .foregroundStyle(.black)
+            .padding(12)
+            .background(Prep4JobTheme.card)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.gray.opacity(0.15)))
+            .accessibilityLabel(L10n.Account.email)
+            SecureField(
+                L10n.Account.password,
+                text: $password,
+                prompt: Text(L10n.Account.password).foregroundStyle(.black)
+            )
+            .textContentType(isCreatingAccount ? .newPassword : .password)
+            .textFieldStyle(.plain)
+            .foregroundStyle(.black)
+            .padding(12)
+            .background(Prep4JobTheme.card)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.gray.opacity(0.15)))
+            .accessibilityLabel(L10n.Account.password)
 
             if let error = session.error {
                 InlineStatusMessage(message: error.localizedDescription)
@@ -109,12 +136,12 @@ private struct AuthForm: View {
                 isCreatingAccount.toggle()
             }
             .font(.subheadline.weight(.semibold))
-            .foregroundStyle(Prep4JobTheme.indigo)
+            .foregroundStyle(.black)
             .disabled(session.isLoading)
 
             Label(L10n.Account.developmentMode, systemImage: "hammer.fill")
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.black)
         }
     }
 }
@@ -131,7 +158,7 @@ private struct SignedInAccountView: View {
                     Label(account.displayName, systemImage: "person.crop.circle.fill")
                         .font(.title3.weight(.bold))
                         .foregroundStyle(Prep4JobTheme.ink)
-                    Text(account.email).font(.subheadline).foregroundStyle(.secondary)
+                    Text(account.email).font(.subheadline).foregroundStyle(.black)
                 }
             }
 
@@ -163,11 +190,11 @@ private struct LegalView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 Text(L10n.Account.privacy).font(.title2.weight(.bold))
-                Text(L10n.Account.legalBody).foregroundStyle(.secondary)
+                Text(L10n.Account.legalBody).foregroundStyle(.black)
                 Divider()
                 Text(L10n.Account.terms).font(.title2.weight(.bold))
                 Text(L10n.Account.termsBody)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.black)
                 Divider()
                 Button(L10n.Account.deleteAccount, role: .destructive) {
                     showingDeleteConfirmation = true
@@ -206,12 +233,12 @@ private struct PremiumCard: View {
             .foregroundStyle(Prep4JobTheme.indigo)
             Text(L10n.Subscription.subtitle)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.black)
 
             if subscription.products.isEmpty {
                 Text(L10n.Subscription.storeUnavailable)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.black)
             } else {
                 ForEach(subscription.products) { product in
                     Button {
@@ -220,7 +247,7 @@ private struct PremiumCard: View {
                         HStack {
                             VStack(alignment: .leading, spacing: 3) {
                                 Text(product.displayName).font(.subheadline.weight(.semibold))
-                                Text(product.periodDescription).font(.caption).foregroundStyle(.secondary)
+                                Text(product.periodDescription).font(.caption).foregroundStyle(.black)
                             }
                             Spacer()
                             Text(product.displayPrice).font(.headline.weight(.bold))
@@ -299,3 +326,4 @@ private struct PremiumCard: View {
         }
     }
 }
+

@@ -138,7 +138,7 @@ struct LoadingStateView: View {
                 .controlSize(.regular)
             Text(message)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.black)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
@@ -167,7 +167,7 @@ struct EmptyStateView: View {
                 .multilineTextAlignment(.center)
             Text(message)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.black)
                 .multilineTextAlignment(.center)
             if let actionTitle, let action {
                 SecondaryButton(title: actionTitle, systemImage: "arrow.clockwise", action: action)
@@ -196,7 +196,7 @@ struct ErrorStateView: View {
                 .foregroundStyle(Prep4JobTheme.ink)
             Text(message)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.black)
                 .multilineTextAlignment(.center)
             if let retry {
                 SecondaryButton(title: L10n.Common.retry, systemImage: "arrow.clockwise", action: retry)
@@ -260,7 +260,7 @@ struct SectionTitle: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title).font(.title3.weight(.bold)).foregroundStyle(Prep4JobTheme.ink)
             if let subtitle {
-                Text(subtitle).font(.subheadline).foregroundStyle(.secondary)
+                Text(subtitle).font(.subheadline).foregroundStyle(.black)
             }
         }
     }
@@ -279,7 +279,7 @@ struct ProgressRing: View {
             VStack(spacing: 0) {
                 Text(L10n.Common.percent(Int(value * 100))).font(.title2.weight(.bold))
                     .foregroundStyle(Prep4JobTheme.ink)
-                Text(L10n.Common.ready).font(.caption).foregroundStyle(.secondary)
+                Text(L10n.Common.ready).font(.caption).foregroundStyle(.black)
             }
         }
         .accessibilityElement(children: .combine)

@@ -17,7 +17,7 @@ struct DailyQuestionView: View {
                             current: viewModel.currentQuestion + 1,
                             total: viewModel.questionCount
                         ))
-                        .font(.caption.weight(.bold)).foregroundStyle(.secondary)
+                        .font(.caption.weight(.bold)).foregroundStyle(.black)
                         Spacer()
                         Text(question.category).font(.caption.weight(.semibold)).foregroundStyle(Prep4JobTheme.indigo)
                     }
@@ -42,7 +42,7 @@ struct DailyQuestionView: View {
                     Card {
                         Label(L10n.DailyQuestion.tip, systemImage: "lightbulb.fill")
                             .font(.headline.weight(.bold)).foregroundStyle(Prep4JobTheme.indigo)
-                        Text(question.tip).font(.subheadline).foregroundStyle(.secondary).padding(.top, 6)
+                        Text(question.tip).font(.subheadline).foregroundStyle(.black).padding(.top, 6)
                     }
 
                     switch viewModel.answerState {
@@ -110,7 +110,7 @@ struct AnswerCard: View {
             Label(L10n.DailyQuestion.recommendedAnswer, systemImage: "sparkles")
                 .font(.headline.weight(.bold)).foregroundStyle(Prep4JobTheme.indigo)
             Text(L10n.DailyQuestion.answerDescription)
-                .font(.subheadline).foregroundStyle(.secondary)
+                .font(.subheadline).foregroundStyle(.black)
             Text(viewModel.answerText).font(.subheadline).foregroundStyle(Prep4JobTheme.ink)
             LazyVGrid(
                 columns: [GridItem(.adaptive(minimum: 100), alignment: .leading)],
@@ -197,7 +197,7 @@ struct AnswerEditorView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text(L10n.DailyQuestion.editorHint)
-                .font(.subheadline).foregroundStyle(.secondary)
+                .font(.subheadline).foregroundStyle(.black)
             AnswerTextView(text: viewModel.savedAnswerBinding)
                 .frame(minHeight: 220)
                 .padding(12)
@@ -255,3 +255,4 @@ private struct AnswerTextView: UIViewRepresentable {
         }
     }
 }
+

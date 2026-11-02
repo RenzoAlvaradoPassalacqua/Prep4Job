@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RootTabView: View {
     @ObservedObject var store: PrepStore
+    @StateObject private var session = SessionStore()
 
     var body: some View {
         Group {
@@ -17,7 +18,7 @@ struct RootTabView: View {
                 }
             } else {
                 TabView {
-                    HomeView(store: store)
+                    HomeView(store: store, session: session)
                         .tabItem { Label(L10n.Tabs.home, systemImage: "house.fill") }
                     LearnView(store: store)
                         .tabItem { Label(L10n.Tabs.learn, systemImage: "book.closed.fill") }
@@ -33,9 +34,20 @@ struct RootTabView: View {
 
 struct HomeView: View {
     @StateObject private var viewModel: HomeViewModel
+    @ObservedObject var session: SessionStore
 
-    init(store: PrepStore) {
+    init(store: PrepStore, session: SessionStore) {
         _viewModel = StateObject(wrappedValue: HomeViewModel(store: store))
+        self.session = session
+    }
+
+    private var timeGreeting: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 6..<12: return "Buenos días"
+        case 12..<20: return "Buenas tardes"
+        default: return "Buenas noches"
+        }
     }
 
     var body: some View {
@@ -45,11 +57,11 @@ struct HomeView: View {
                     HStack(alignment: .top) {
                         VStack(alignment: .leading, spacing: 5) {
                             Text(L10n.Home.appName).font(.title2.weight(.bold)).foregroundStyle(Prep4JobTheme.ink)
-                            Text(L10n.Home.subtitle).font(.subheadline).foregroundStyle(.secondary)
+                            Text(L10n.Home.subtitle).font(.subheadline).foregroundStyle(.black)
                         }
                         Spacer()
                         NavigationLink {
-                            AccountView()
+                            AccountView(session: session)
                         } label: {
                             Image(systemName: "person.crop.circle")
                                 .font(.title3)
@@ -58,9 +70,9 @@ struct HomeView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 7) {
-                        Text(L10n.Home.greeting).font(.largeTitle.weight(.bold)).foregroundStyle(Prep4JobTheme.ink)
+                        Text((session.account?.displayName.isEmpty == false) ? "\(timeGreeting), \(session.account!.displayName)" : timeGreeting).font(.largeTitle.weight(.bold)).foregroundStyle(Prep4JobTheme.ink)
                         Text(L10n.Home.intro)
-                            .font(.subheadline).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                            .font(.subheadline).foregroundStyle(.black).fixedSize(horizontal: false, vertical: true)
                     }
 
                     Card {
@@ -69,7 +81,7 @@ struct HomeView: View {
                                 Text(L10n.Home.todayPreparation).font(.headline.weight(.bold))
                                 Spacer()
                                 Label(L10n.Home.todayDate, systemImage: "calendar").font(.caption)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(.black)
                             }
                         ViewThatFits(in: .horizontal) {
                             HStack(spacing: 22) {

@@ -13,7 +13,7 @@ struct LearnView: View {
                 VStack(alignment: .leading, spacing: 18) {
                     VStack(alignment: .leading, spacing: 5) {
                         Text(L10n.Learn.title).font(.largeTitle.weight(.bold)).foregroundStyle(Prep4JobTheme.ink)
-                        Text(L10n.Learn.subtitle).font(.subheadline).foregroundStyle(.secondary)
+                        Text(L10n.Learn.subtitle).font(.subheadline).foregroundStyle(.black)
                     }
                     if viewModel.concepts.isEmpty {
                         EmptyStateView(
@@ -52,7 +52,7 @@ struct ConceptRow: View {
                 .clipShape(RoundedRectangle(cornerRadius: 13))
             VStack(alignment: .leading, spacing: 4) {
                 Text(concept.title).font(.headline.weight(.bold)).foregroundStyle(Prep4JobTheme.ink)
-                Text(concept.subtitle).font(.subheadline).foregroundStyle(.secondary).lineLimit(2)
+                Text(concept.subtitle).font(.subheadline).foregroundStyle(.black).lineLimit(2)
             }
             Spacer()
             Image(systemName: "chevron.right").font(.caption.weight(.bold)).foregroundStyle(.secondary)
@@ -95,7 +95,7 @@ struct ConceptDetailView: View {
                             }
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(step.title).font(.headline.weight(.bold)).foregroundStyle(Prep4JobTheme.ink)
-                                Text(step.detail).font(.subheadline).foregroundStyle(.secondary)
+                                Text(step.detail).font(.subheadline).foregroundStyle(.black)
                             }
                             Spacer()
                         }
