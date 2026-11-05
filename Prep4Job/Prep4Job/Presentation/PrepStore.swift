@@ -1,5 +1,12 @@
 import Combine
 @preconcurrency import Foundation
+import Observation
+
+@MainActor
+@Observable
+final class AnswerDraft {
+    var text = ""
+}
 
 enum PrepStoreError: LocalizedError, Equatable {
     case emptyContent
@@ -22,7 +29,12 @@ final class PrepStore: ObservableObject {
     @Published private(set) var currentQuestion = 0
     @Published private(set) var answeredQuestions: Set<UUID> = []
     @Published private(set) var completedConcepts: Set<UUID> = []
-    @Published var savedAnswer = ""
+    // Draft changes are observed by the editor, not broadcast to every store subscriber.
+    let answerDraft = AnswerDraft()
+    private(set) var savedAnswer: String {
+        get { answerDraft.text }
+        set { answerDraft.text = newValue }
+    }
     @Published private(set) var showingAnswer = false
     @Published private(set) var streak = 12
     @Published private(set) var isLoading = false
@@ -42,6 +54,7 @@ final class PrepStore: ObservableObject {
     private let repetitionScheduler = SpacedRepetitionScheduler()
     private let persistence: any ProgressPersistence
     private let reminderScheduler: any StudyReminderScheduling
+    @Published private(set) var hasLoadedContent = false
     private var hasLoaded = false
     private var persistenceTask: Task<Void, Never>?
     private var notificationObservers: [NSObjectProtocol] = []
@@ -82,14 +95,10 @@ final class PrepStore: ObservableObject {
         selectDailyQuestion.execute(questions: questions, at: currentQuestion)
     }
 
-    var hasLoadedContent: Bool {
-        hasLoaded
-    }
-
     var completion: Double {
         calculateProgress.execute(
-            answeredQuestionIDs: answeredQuestions,
-            completedConceptIDs: completedConcepts,
+            answeredQuestionIDs: answeredQuestions.intersection(questions.map(\.id)),
+            completedConceptIDs: completedConcepts.intersection(concepts.map(\.id)),
             questionCount: questions.count,
             conceptCount: concepts.count
         )
@@ -112,17 +121,37 @@ final class PrepStore: ObservableObject {
 
         do {
             async let fetchedContent = loadPreparationContent.execute()
-            async let savedProgress = persistence.load()
-            let (content, snapshot) = try await(fetchedContent, savedProgress)
+            if !hasLoadedContent {
+                let snapshot = await persistence.load()
+                // Keep progress for remote IDs until the refreshed catalog arrives.
+                restore(snapshot)
+                seedMissingSchedules()
+                hasLoadedContent = true
+            }
+            let content = try await fetchedContent
 
             guard !content.questions.isEmpty, !content.concepts.isEmpty else {
                 throw PrepStoreError.emptyContent
             }
 
-            questions = content.questions
+            let activeQuestion = question
+            var refreshedQuestions = content.questions
+            // A background refresh must not replace the question being answered.
+            if let activeQuestion, !refreshedQuestions.contains(where: { $0.id == activeQuestion.id }),
+               !savedAnswer.isEmpty || showingAnswer {
+                refreshedQuestions.append(activeQuestion)
+            }
+            questions = refreshedQuestions
             concepts = content.concepts
-            currentQuestion = min(currentQuestion, content.questions.count - 1)
-            restore(snapshot)
+            currentQuestion = activeQuestion.flatMap { active in
+                questions.firstIndex { $0.id == active.id }
+            } ?? min(currentQuestion, questions.count - 1)
+            let questionIDs = Set(questions.map(\.id))
+            let conceptIDs = Set(concepts.map(\.id))
+            answeredQuestions.formIntersection(questionIDs)
+            completedConcepts.formIntersection(conceptIDs)
+            let validIDs = questionIDs.union(conceptIDs)
+            reviewSchedules = reviewSchedules.filter { validIDs.contains($0.key) }
             seedMissingSchedules()
             hasLoaded = true
         } catch let storeError as PrepStoreError {
@@ -247,22 +276,19 @@ final class PrepStore: ObservableObject {
 
 private extension PrepStore {
     func restore(_ snapshot: ProgressSnapshot) {
-        let questionIDs = Set(questions.map(\.id))
-        let conceptIDs = Set(concepts.map(\.id))
-        answeredQuestions = Set(snapshot.answeredQuestionIDs).intersection(questionIDs)
-        completedConcepts = Set(snapshot.completedConceptIDs).intersection(conceptIDs)
+        answeredQuestions = Set(snapshot.answeredQuestionIDs)
+        completedConcepts = Set(snapshot.completedConceptIDs)
         savedAnswer = snapshot.savedAnswer
         savedAnswerStore = snapshot.savedAnswers
         streak = snapshot.streak
-        let validIDs = questionIDs.union(conceptIDs)
         reviewSchedules = Dictionary(
             uniqueKeysWithValues: snapshot.reviewSchedules
-                .filter { validIDs.contains($0.contentID) }
                 .map { ($0.contentID, $0) }
         )
         dailyActivity = snapshot.dailyActivity.sorted { $0.date < $1.date }
         reminderSettings = snapshot.reminderSettings
         totalStudySessions = snapshot.totalStudySessions
+        lastStudyDate = snapshot.lastStudyDate
     }
 
     func seedMissingSchedules() {

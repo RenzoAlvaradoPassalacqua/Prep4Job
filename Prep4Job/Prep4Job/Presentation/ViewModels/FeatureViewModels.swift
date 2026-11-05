@@ -70,7 +70,9 @@ final class DailyQuestionViewModel: StoreViewModel {
     }
 
     var savedAnswerBinding: Binding<String> {
-        Binding(
+        // Read during the editor's body evaluation so only that view observes the draft.
+        _ = store.answerDraft.text
+        return Binding(
             get: { self.store.savedAnswer },
             set: { self.store.updateSavedAnswer($0) }
         )

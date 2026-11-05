@@ -10,7 +10,7 @@ struct LearnView: View {
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 18) {
+                LazyVStack(alignment: .leading, spacing: 18) {
                     VStack(alignment: .leading, spacing: 5) {
                         Text(L10n.Learn.title).font(.largeTitle.weight(.bold)).foregroundStyle(Prep4JobTheme.ink)
                         Text(L10n.Learn.subtitle).font(.subheadline).foregroundStyle(.black)

@@ -10,7 +10,6 @@ import SwiftUI
 @main
 struct Prep4JobApp: App {
     @StateObject private var store = PrepStore()
-    @State private var isSplashPresented = true
 
     init() {
         Observability.start()
@@ -19,21 +18,11 @@ struct Prep4JobApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ZStack {
-                RootTabView(store: store)
-
-                if isSplashPresented {
-                    SplashView(isContentReady: store.hasLoadedContent) {
-                        isSplashPresented = false
-                    }
-                    .transition(.opacity)
-                    .zIndex(1)
+            RootTabView(store: store)
+                .tint(Prep4JobTheme.indigo)
+                .task {
+                    await store.load()
                 }
-            }
-            .tint(Prep4JobTheme.indigo)
-            .task {
-                await store.load()
-            }
         }
     }
 }

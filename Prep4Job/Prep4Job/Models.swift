@@ -1,6 +1,6 @@
 import Foundation
 
-struct InterviewQuestion: Identifiable, Hashable, Codable, Sendable {
+nonisolated struct InterviewQuestion: Identifiable, Hashable, Codable, Sendable {
     let id: UUID
     let title: String
     let category: String
@@ -59,7 +59,7 @@ struct InterviewQuestion: Identifiable, Hashable, Codable, Sendable {
     }
 }
 
-struct LearningStep: Identifiable, Hashable, Codable, Sendable {
+nonisolated struct LearningStep: Identifiable, Hashable, Codable, Sendable {
     let id: UUID
     let title: String
     let detail: String
@@ -71,7 +71,7 @@ struct LearningStep: Identifiable, Hashable, Codable, Sendable {
     }
 }
 
-struct LearningConcept: Identifiable, Hashable, Codable, Sendable {
+nonisolated struct LearningConcept: Identifiable, Hashable, Codable, Sendable {
     let id: UUID
     let title: String
     let subtitle: String
@@ -104,6 +104,6 @@ struct LearningConcept: Identifiable, Hashable, Codable, Sendable {
     }
 }
 
-enum ConceptColor: Hashable, Codable, Sendable {
+nonisolated enum ConceptColor: Hashable, Codable, Sendable {
     case indigo, mint, amber, violet
 }

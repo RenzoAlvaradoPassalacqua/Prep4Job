@@ -5,11 +5,124 @@
 //  Created by Renzo on 10/09/26.
 //
 
+import Combine
 import Foundation
+import SwiftUI
 @testable import Prep4Job
 import Testing
 
 struct Prep4JobTests {
+    @Test
+    func contentPaginationContinuesAfterShortAndFilteredPages() async throws {
+        let source = TestContentPages()
+        let values: [Int] = try await ContentPageLoader().load(
+            fetchPage: { cursor, limit in await source.fetch(cursor: cursor, limit: limit) },
+            transform: { $0.value > 2 ? $0.value : nil }
+        )
+        #expect(values == [3, 4, 5])
+        #expect(await source.requestCount == 4)
+        #expect(await source.requestedLimits == [100, 100, 100, 100])
+    }
+
+    @Test
+    func contentPaginationPropagatesLaterPageFailure() async {
+        let source = TestContentPages()
+        do {
+            let _: [Int] = try await ContentPageLoader().load(
+                fetchPage: { cursor, limit in
+                    if cursor != nil { throw TestContentError.failed }
+                    return await source.fetch(cursor: cursor, limit: limit)
+                },
+                transform: { $0.value }
+            )
+            Issue.record("A failed page must not return a partial catalog")
+        } catch TestContentError.failed {
+            #expect(await source.requestCount == 1)
+        } catch {
+            Issue.record("Unexpected error: \(error)")
+        }
+    }
+
+    @Test
+    func cancelledContentPaginationDoesNotRequestPages() async {
+        let source = TestContentPages()
+        let task = Task {
+            withUnsafeCurrentTask { $0?.cancel() }
+            return try await ContentPageLoader().load(
+                fetchPage: { cursor, limit in await source.fetch(cursor: cursor, limit: limit) },
+                transform: { $0.value }
+            )
+        }
+        do {
+            _ = try await task.value
+            Issue.record("Cancelled loading must throw")
+        } catch is CancellationError {
+            #expect(await source.requestCount == 0)
+        } catch {
+            Issue.record("Unexpected error: \(error)")
+        }
+    }
+
+
+    @Test @MainActor
+    func typingDoesNotNotifySharedStoreOrFeatureViewModels() {
+        let store = PrepStore(
+            repository: DemoContentRepository(),
+            persistence: InMemoryProgressPersistence()
+        )
+        let daily = DailyQuestionViewModel(store: store)
+        let home = HomeViewModel(store: store)
+        let learn = LearnViewModel(store: store)
+        let progress = ProgressViewModel(store: store)
+        var notifications = 0
+        let subscriptions = [
+            store.objectWillChange.sink { notifications += 1 },
+            daily.objectWillChange.sink { notifications += 1 },
+            home.objectWillChange.sink { notifications += 1 },
+            learn.objectWillChange.sink { notifications += 1 },
+            progress.objectWillChange.sink { notifications += 1 }
+        ]
+        defer { subscriptions.forEach { $0.cancel() } }
+
+        daily.savedAnswerBinding.wrappedValue = "My"
+        daily.savedAnswerBinding.wrappedValue = "My answer"
+        #expect(store.savedAnswer == "My answer")
+        #expect(daily.savedAnswerBinding.wrappedValue == "My answer")
+        #expect(notifications == 0)
+
+        daily.saveAnswer()
+        #expect(daily.answerText == "My answer")
+        #expect(notifications > 0)
+
+        daily.nextQuestion()
+        #expect(daily.savedAnswerBinding.wrappedValue.isEmpty)
+    }
+
+
+    @Test @MainActor
+    func localContentIsReadyBeforeRemoteRefreshCompletes() async {
+        let repository = SuspendedContentRepository()
+        let store = PrepStore(
+            repository: repository,
+            persistence: InMemoryProgressPersistence()
+        )
+        let loading = Task { await store.load() }
+        // Wait for local restoration, without allowing the remote request to finish.
+        for _ in 0..<10_000 {
+            if store.hasLoadedContent { break }
+            await Task.yield()
+        }
+        #expect(store.hasLoadedContent)
+        #expect(store.isLoading)
+        #expect(!store.questions.isEmpty)
+        store.updateSavedAnswer("Edited during refresh")
+        await repository.release()
+        await loading.value
+        #expect(store.savedAnswer == "Edited during refresh")
+        #expect(!store.isLoading)
+        #expect(store.hasLoadedContent)
+    }
+
     @Test @MainActor
     func storeLoadsDemoContentAndRevealsAnswer() async {
         let store = PrepStore(repository: DemoContentRepository())
@@ -282,6 +395,53 @@ struct Prep4JobTests {
         #expect(products.count == 2)
         #expect(entitlement.isActive)
         #expect((await service.currentEntitlement()).isActive)
+    }
+}
+
+nonisolated private enum TestContentError: Error {
+    case failed
+}
+
+nonisolated private struct TestContentRow: Identifiable, Sendable {
+    let id: UUID
+    let value: Int
+}
+
+private actor TestContentPages {
+    private let rows: [TestContentRow] = (1...5).map { value in
+        TestContentRow(id: UUID(), value: value)
+    }
+    private(set) var requestCount = 0
+    private(set) var requestedLimits: [Int] = []
+
+    func fetch(cursor: UUID?, limit: Int) -> [TestContentRow] {
+        requestCount += 1
+        requestedLimits.append(limit)
+        let start = cursor.flatMap { id in rows.firstIndex { $0.id == id } }.map { $0 + 1 } ?? 0
+        // Simulate a server cap below the requested page size.
+        return Array(rows.dropFirst(start).prefix(min(limit, 2)))
+    }
+}
+
+private actor SuspendedContentRepository: PrepContentRepository {
+    private var released = false
+    private var continuation: CheckedContinuation<Void, Never>?
+
+    func fetchQuestions() async throws -> [InterviewQuestion] {
+        if !released {
+            await withCheckedContinuation { continuation = $0 }
+        }
+        return await DemoContent.questions
+    }
+
+    func fetchConcepts() async throws -> [LearningConcept] {
+        await DemoContent.concepts
+    }
+
+    func release() {
+        released = true
+        continuation?.resume()
+        continuation = nil
     }
 }
 

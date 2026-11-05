@@ -46,32 +46,48 @@ struct SupabaseContentRepository: PrepContentRepository {
     }
 
     func fetchQuestions() async throws -> [InterviewQuestion] {
-        let rows: [RemoteQuestion] = try await client
-            .from("interview_questions")
-            .select()
-            .execute()
-            .value
-        let models = await MainActor.run {
-            rows.map { $0.model }
-        }
-        let isPremium: Bool = await MainActor.run { policy.isPremium }
-        return models.filter { !$0.requiresPremium || isPremium }
+        let isPremium = await MainActor.run { policy.isPremium }
+        return try await ContentPageLoader().load(
+            fetchPage: { [client] cursor, limit in
+                var query = client.from("interview_questions").select()
+                if let cursor {
+                    query = query.gt("id", value: cursor.uuidString)
+                }
+                let rows: [RemoteQuestion] = try await query
+                    .order("id", ascending: true)
+                    .limit(limit)
+                    .execute()
+                    .value
+                return rows
+            },
+            transform: { row in
+                guard !(row.requiresPremium ?? false) || isPremium else { return nil }
+                return row.model
+            }
+        )
     }
 
     func fetchConcepts() async throws -> [LearningConcept] {
-        let rows: [RemoteConcept] = try await client
-            .from("learning_concepts")
-            .select()
-            .execute()
-            .value
-        return await MainActor.run {
-            rows.map { $0.model }
-        }
+        try await ContentPageLoader().load(
+            fetchPage: { [client] cursor, limit in
+                var query = client.from("learning_concepts").select()
+                if let cursor {
+                    query = query.gt("id", value: cursor.uuidString)
+                }
+                let rows: [RemoteConcept] = try await query
+                    .order("id", ascending: true)
+                    .limit(limit)
+                    .execute()
+                    .value
+                return rows
+            },
+            transform: { $0.model }
+        )
     }
 
 }
 
-private struct RemoteQuestion: Decodable {
+nonisolated private struct RemoteQuestion: Decodable, Identifiable, Sendable {
     let id: UUID
     let category: String
     let question: String
@@ -89,12 +105,13 @@ private struct RemoteQuestion: Decodable {
             purpose: purpose,
             tip: tip,
             answer: answer,
-            concepts: concepts
+            concepts: concepts,
+            requiresPremium: requiresPremium ?? false
         )
     }
 }
 
-private struct RemoteConcept: Decodable {
+nonisolated private struct RemoteConcept: Decodable, Identifiable, Sendable {
     let id: UUID
     let title: String
     let summary: String
@@ -102,6 +119,32 @@ private struct RemoteConcept: Decodable {
 
     var model: LearningConcept {
         LearningConcept(id: id, title: title, subtitle: summary, explanation: detail, steps: [], color: .indigo)
+    }
+}
+
+// Actor isolation keeps page conversion and accumulation off the UI actor.
+actor ContentPageLoader {
+    enum PaginationError: Error {
+        case cursorDidNotAdvance
+    }
+
+    func load<Row: Identifiable & Sendable, Model: Sendable>(
+        fetchPage: @Sendable (UUID?, Int) async throws -> [Row],
+        transform: @Sendable (Row) -> Model?
+    ) async throws -> [Model] where Row.ID == UUID {
+        var cursor: UUID?
+        var models: [Model] = []
+        while true {
+            try Task.checkCancellation()
+            let rows = try await fetchPage(cursor, 100)
+            try Task.checkCancellation()
+            guard let last = rows.last else { return models }
+            guard last.id != cursor else { throw PaginationError.cursorDidNotAdvance }
+            models.append(contentsOf: rows.compactMap(transform))
+            cursor = last.id
+            // A short page can be a server cap. Only an empty page ends the load.
+            // Advance using raw rows even when every row is filtered out.
+        }
     }
 }
 
